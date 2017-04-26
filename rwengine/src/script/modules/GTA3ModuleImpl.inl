@@ -2295,15 +2295,20 @@ bool opcode_00c6(const ScriptArguments& args) {
     @arg arg1 
 */
 void opcode_00d6(const ScriptArguments& args, const ScriptInt arg1) {
+    RW_CHECK((0 <= arg1 && arg1 <= 7) || (21 <= arg1 && arg1 <= 27), "");
     if (arg1 <= 7) {
-    	args.getThread()->conditionCount = arg1+1;
-    	args.getThread()->conditionMask = 0xFF;
-    	args.getThread()->conditionAND = true;
+        /*A value in the range [0, 7] means there are [1, 8] AND conditions.*/
+        args.getThread()->conditionCount = arg1+1+1; // +1 to include this conditionResult
+        args.getThread()->conditionMask = 0xFF;
+        args.getThread()->conditionResult = true;
+        args.getThread()->conditionAND = true;
     }
     else {
-    	args.getThread()->conditionCount = arg1-19;
-    	args.getThread()->conditionMask = 0x00;
-    	args.getThread()->conditionAND = false;
+        /*A value in the range [21, 27] means there are [2, 8] OR conditions.*/
+        args.getThread()->conditionCount = arg1-19+1; // +1 to include this conditionResult
+        args.getThread()->conditionMask = 0x00;
+        args.getThread()->conditionResult = false;
+        args.getThread()->conditionAND = false;
     }
 }
 
