@@ -154,18 +154,12 @@ void ScriptMachine::executeThread(SCMThread& t, int msPassed) {
         }
 
         // Handle conditional results for IF statements.
-        if (t.conditionCount > 0 && opcode != 0x00D6)  /// @todo add conditional
-                                                       /// flag to opcodes
-                                                       /// instead of checking
-                                                       /// for 0x00D6
+        if (t.conditionCount > 0)
         {
             --t.conditionCount;
             if (t.conditionAND) {
-                if (t.conditionResult == false) {
+                if (!t.conditionResult) {
                     t.conditionMask = 0;
-                } else {
-                    // t.conditionMask is already set to 0xFF by the if and
-                    // opcode.
                 }
             } else {
                 t.conditionMask = t.conditionMask || t.conditionResult;
