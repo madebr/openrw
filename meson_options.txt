@@ -1,0 +1,11 @@
+option('build_tests', type: 'boolean', value: false, description: 'Build test suite')
+option('build_viewer', type: 'boolean', value: false, description: 'Build GUI data viewer')
+
+option('verbose_debug_messages', type: 'boolean', value: true, description: 'Print verbose debugging messages')
+option('script_debug', type: 'boolean', value: false, description: 'Enable verbose script execution')
+option('profiling', type: 'boolean', value: false, description: 'Enable detailed profiling metrics')
+option('tests_nodata', type: 'boolean', value: false, description: 'Build tests for no-data testing')
+
+option('failed_check_action', type: 'combo', value: 'IGNORE', choices: ['IGNORE', 'ABORT', 'BREAKPOINT'], description: 'What action to perform on a failed RW_CHECK (only in debug mode)')
+
+option('docdir', type: 'string', value: 'share/doc/openrw', description: 'doc install path')
