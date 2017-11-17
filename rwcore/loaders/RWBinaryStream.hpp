@@ -17,17 +17,17 @@
  * data relating to the parent chunk).
  */
 class RWBStream {
-    char* _data;
+    const char* _data;
     std::ptrdiff_t _size;
-    char* _dataCur;
-    char* _nextChunk;
+    const char* _dataCur;
+    const char* _nextChunk;
     std::uint32_t _chunkVersion;
     size_t _currChunkSz;
 
 public:
     typedef std::uint32_t ChunkID;
 
-    RWBStream(char* data, size_t size)
+    RWBStream(const char* data, size_t size)
         : _data(data), _size(size), _dataCur(data), _nextChunk(data) {
     }
 
@@ -55,7 +55,7 @@ public:
         return id;
     }
 
-    char* getCursor() const {
+    const char* getCursor() const {
         return _dataCur;
     }
 
@@ -288,7 +288,7 @@ public:
     /**
      * Data pointer
      */
-    char* data;
+    const char* data;
 
     /**
      * Offset of this section in the data
@@ -303,13 +303,13 @@ public:
     /**
      * Structure header
      */
-    BSSectionHeader* structure;
+    const BSSectionHeader* structure;
 
-    BinaryStreamSection(char* data, size_t offset = 0)
+    BinaryStreamSection(const char* data, size_t offset = 0)
         : data(data), offset(offset), structure(nullptr) {
-        header = *reinterpret_cast<BSSectionHeader*>(data + offset);
+        header = *reinterpret_cast<const BSSectionHeader*>(data + offset);
         if (header.size > sizeof(structure)) {
-            structure = reinterpret_cast<BSSectionHeader*>(
+            structure = reinterpret_cast<const BSSectionHeader*>(
                 data + offset + sizeof(BSSectionHeader));
             if (structure->id != SID_Struct) {
                 structure = nullptr;
@@ -319,7 +319,7 @@ public:
 
     template <class T>
     T readStructure() {
-        return *reinterpret_cast<T*>(data + offset +
+        return *reinterpret_cast<const T*>(data + offset +
                                      sizeof(BSSectionHeader) * 2);
     }
 
@@ -334,7 +334,7 @@ public:
         return *reinterpret_cast<T*>(data + offset + internalOffset);
     }
 
-    char* raw() {
+    const char* raw() {
         return data + offset + sizeof(BSSectionHeader);
     }
 

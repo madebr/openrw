@@ -8,10 +8,10 @@
  * @brief Contains a pointer to a file's contents.
  */
 struct FileContentsInfo {
-    std::unique_ptr<char[]> data;
+    std::unique_ptr<const char[]> data;
     size_t length;
 
-    FileContentsInfo(std::unique_ptr<char[]> mem, size_t len)
+    FileContentsInfo(std::unique_ptr<const char[]> mem, size_t len)
         : data(std::move(mem)), length(len) {
     }
 
