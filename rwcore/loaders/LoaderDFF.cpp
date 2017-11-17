@@ -57,16 +57,16 @@ LoaderDFF::FrameList LoaderDFF::readFrameList(const RWBStream &stream) {
         throw DFFLoaderException("Frame List missing struct chunk");
     }
 
-    char *headerPtr = listStream.getCursor();
+    const char *headerPtr = listStream.getCursor();
 
-    unsigned int numFrames = *reinterpret_cast<std::uint32_t *>(headerPtr);
+    unsigned int numFrames = *reinterpret_cast<const std::uint32_t *>(headerPtr);
     headerPtr += sizeof(std::uint32_t);
 
     FrameList framelist;
     framelist.reserve(numFrames);
 
     for (auto f = 0u; f < numFrames; ++f) {
-        auto data = reinterpret_cast<RWBSFrame *>(headerPtr);
+        auto data = reinterpret_cast<const RWBSFrame *>(headerPtr);
         headerPtr += sizeof(RWBSFrame);
         auto frame =
             std::make_shared<ModelFrame>(f, data->rotation, data->position);
@@ -123,7 +123,7 @@ LoaderDFF::GeometryList LoaderDFF::readGeometryList(const RWBStream &stream) {
         throw DFFLoaderException("Geometry List missing struct chunk");
     }
 
-    char *headerPtr = listStream.getCursor();
+    const char *headerPtr = listStream.getCursor();
 
     unsigned int numGeometries = bit_cast<std::uint32_t>(*headerPtr);
     headerPtr += sizeof(std::uint32_t);
@@ -155,7 +155,7 @@ GeometryPtr LoaderDFF::readGeometry(const RWBStream &stream) {
 
     auto geom = std::make_shared<Geometry>();
 
-    char *headerPtr = geomStream.getCursor();
+    const char *headerPtr = geomStream.getCursor();
 
     geom->flags = bit_cast<std::uint16_t>(*headerPtr);
     headerPtr += sizeof(std::uint16_t);
@@ -303,7 +303,7 @@ void LoaderDFF::readMaterial(const GeometryPtr &geom, const RWBStream &stream) {
         throw DFFLoaderException("Material missing struct chunk");
     }
 
-    char *matData = materialStream.getCursor();
+    const char *matData = materialStream.getCursor();
 
     Geometry::Material material;
 

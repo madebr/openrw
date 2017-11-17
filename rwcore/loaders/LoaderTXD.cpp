@@ -40,13 +40,13 @@ const size_t paletteSize = 1024;
 
 static
 void processPalette(uint32_t* fullColor, RW::BinaryStreamSection& rootSection) {
-    uint8_t* dataBase = reinterpret_cast<uint8_t*>(
+    const uint8_t* dataBase = reinterpret_cast<const uint8_t*>(
         rootSection.raw() + sizeof(RW::BSSectionHeader) +
         sizeof(RW::BSTextureNative) - 4);
 
-    uint8_t* coldata = (dataBase + paletteSize + sizeof(uint32_t));
-    uint32_t raster_size = *reinterpret_cast<uint32_t*>(dataBase + paletteSize);
-    uint32_t* palette = reinterpret_cast<uint32_t*>(dataBase);
+    const uint8_t* coldata = (dataBase + paletteSize + sizeof(uint32_t));
+    uint32_t raster_size = *reinterpret_cast<const uint32_t*>(dataBase + paletteSize);
+    const uint32_t* palette = reinterpret_cast<const uint32_t*>(dataBase);
 
     for (size_t j = 0; j < raster_size; ++j) {
         *(fullColor++) = palette[coldata[j]];

@@ -76,17 +76,17 @@ struct Animation {
 
 class LoaderIFP {
     template <class T>
-    T* read(char* data, size_t* ofs) {
+    const T* read(const char* data, size_t* ofs) {
         size_t b = *ofs;
         *ofs += sizeof(T);
-        return reinterpret_cast<T*>(data + b);
+        return reinterpret_cast<const T*>(data + b);
     }
     template <class T>
-    T* peek(char* data, const size_t* ofs) {
+    const T* peek(const char* data, size_t* ofs) {
         return reinterpret_cast<T*>(data + *ofs);
     }
 
-    std::string readString(char* data, size_t* ofs);
+    std::string readString(const char* data, size_t* ofs);
 
 public:
     struct BASE {
@@ -138,7 +138,7 @@ public:
 
     AnimationSet animations;
 
-    bool loadFromMemory(char* data);
+    bool loadFromMemory(const char* data);
 };
 
 #endif

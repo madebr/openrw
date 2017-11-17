@@ -58,11 +58,11 @@ AnimationKeyframe AnimationBone::getKeyframe(float time) {
     return frames.back();
 }
 
-bool LoaderIFP::loadFromMemory(char* data) {
+bool LoaderIFP::loadFromMemory(const char* data) {
     size_t data_offs = 0;
     size_t* dataI = &data_offs;
 
-    ANPK* fileRoot = read<ANPK>(data, dataI);
+    const ANPK* fileRoot = read<ANPK>(data, dataI);
     std::string listname = readString(data, dataI);
 
     animations.reserve(fileRoot->info.entries);
@@ -77,15 +77,15 @@ bool LoaderIFP::loadFromMemory(char* data) {
         animation->name = animname;
 
         size_t animstart = data_offs + 8;
-        DGAN* animroot = read<DGAN>(data, dataI);
+        const DGAN* animroot = read<DGAN>(data, dataI);
         std::string infoname = readString(data, dataI);
 
         animation->bones.reserve(animroot->info.entries);
 
         for (auto c = 0u; c < animroot->info.entries; ++c) {
             size_t start = data_offs;
-            CPAN* cpan = read<CPAN>(data, dataI);
-            ANIM* frames = read<ANIM>(data, dataI);
+            const CPAN* cpan = read<CPAN>(data, dataI);
+            const ANIM* frames = read<ANIM>(data, dataI);
 
             AnimationBone boneData{};
             boneData.name = frames->name;
@@ -93,7 +93,7 @@ bool LoaderIFP::loadFromMemory(char* data) {
 
             data_offs += ((8 + frames->base.size) - sizeof(ANIM));
 
-            KFRM* frame = read<KFRM>(data, dataI);
+            const KFRM* frame = read<KFRM>(data, dataI);
             std::string type(frame->base.magic, 4);
 
             float time = 0.f;
@@ -150,7 +150,7 @@ bool LoaderIFP::loadFromMemory(char* data) {
     return true;
 }
 
-std::string LoaderIFP::readString(char* data, size_t* ofs) {
+std::string LoaderIFP::readString(const char* data, size_t* ofs) {
     size_t b = *ofs;
     for (size_t o = *ofs; (o = *ofs);) {
         *ofs += 4;
