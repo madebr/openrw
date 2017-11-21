@@ -27,6 +27,8 @@ if(CHECK_CLANGTIDY)
     find_package(ClangTidy REQUIRED)
 endif()
 
+add_subdirectory(cmake/external/stb)
+
 add_subdirectory(rwlib)
 add_subdirectory(rwengine)
 add_subdirectory(rwgame)
