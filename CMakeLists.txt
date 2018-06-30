@@ -30,6 +30,7 @@ endif()
 add_subdirectory(cmake/external/stb)
 
 add_subdirectory(tools)
+add_subdirectory(assets)
 
 add_subdirectory(rwlib)
 add_subdirectory(rwengine)
