@@ -2,9 +2,20 @@ find_package(Boost COMPONENTS program_options REQUIRED)
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/GitSHA1.cpp.in" "${CMAKE_CURRENT_BINARY_DIR}/GitSHA1.cpp" @ONLY)
 
+imagemagick_convert("${PROJECT_SOURCE_DIR}/assets/logo_box_no_text.svg" "${CMAKE_CURRENT_BINARY_DIR}/logo64.png" 64x64)
+rwembedder_generate_file(
+    INPUT "${CMAKE_CURRENT_BINARY_DIR}/logo64.png"
+    SOURCE "${CMAKE_CURRENT_BINARY_DIR}/logo64.c"
+    HEADER "${CMAKE_CURRENT_BINARY_DIR}/logo64.h"
+    NAME LOGO64
+    )
+
 set(RWGAME_SOURCES
     GitSHA1.h
     "${CMAKE_CURRENT_BINARY_DIR}/GitSHA1.cpp"
+
+    "${CMAKE_CURRENT_BINARY_DIR}/logo64.h"
+    "${CMAKE_CURRENT_BINARY_DIR}/logo64.c"
 
     main.cpp
 
@@ -54,6 +65,7 @@ target_include_directories(rwgame
 target_include_directories(rwgame
     PUBLIC
         "${CMAKE_SOURCE_DIR}/rwgame"
+        "${CMAKE_CURRENT_BINARY_DIR}"
     )
 
 target_link_libraries(rwgame
@@ -61,6 +73,7 @@ target_link_libraries(rwgame
         rwengine
         ${Boost_PROGRAM_OPTIONS_LIBRARY}
         SDL2::SDL2
+        stb::image
     )
 
 openrw_target_apply_options(TARGET rwgame)

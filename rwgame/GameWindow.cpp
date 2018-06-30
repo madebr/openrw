@@ -1,6 +1,11 @@
 #include "GameWindow.hpp"
 #include <core/Logger.hpp>
 
+#include <rw/defines.hpp>
+
+#include <stb_image.h>
+#include <logo64.h>
+
 GameWindow::GameWindow() : window(nullptr), glcontext(nullptr) {
 }
 
@@ -30,11 +35,11 @@ void GameWindow::create(const std::string& title, size_t w, size_t h,
         std::string sdlErrorStr = SDL_GetError();
         throw std::runtime_error("SDL_GL_CreateContext failed: " + sdlErrorStr);
     }
-
-    // This part sets an embedded icon to the window
-    // The source "image" is a 32-bit RGBA buffer exported from GIMP
-    // The full name of the format is "GIMP RGBA C-Source image dump"
-#include "WindowIcon.hpp"
+    int windowIconWidth, windowIconHeight, channels;
+    auto windowIconData = stbi_load_from_memory(LOGO64, sizeof(LOGO64), &windowIconWidth, &windowIconHeight, &channels, 4);
+    if (channels != 4) {
+        RW_ERROR("Icon expected 4 channels. Got " << channels << ".");
+    }
     Uint32 rmask, gmask, bmask, amask;
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
     // Big Endian
@@ -54,6 +59,8 @@ void GameWindow::create(const std::string& title, size_t w, size_t h,
                                     32, windowIconWidth * (32 / 8),
                                     rmask, gmask, bmask, amask);
     SDL_SetWindowIcon(window, icon);
+
+    stbi_image_free(windowIconData);
 
     SDL_ShowWindow(window);
 }
