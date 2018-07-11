@@ -1,0 +1,8 @@
+[submodule "librw"]
+	path = cmake/external/librw
+	url = https://github.com/madebr/librw.git
+	branch = cmake
+[submodule "librwgta"]
+	path = cmake/external/librwgta
+	url = https://github.com/madebr/librwgta.git
+	branch = cmake

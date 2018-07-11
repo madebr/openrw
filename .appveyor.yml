@@ -38,6 +38,7 @@ init:
   - conan remote add bincrafters https://api.bintray.com/conan/bincrafters/public-conan
 
 install:
+  - git submodule init && git submodule update
   - cd "%APPVEYOR_BUILD_FOLDER%"
   - for /f %%i in ('git rev-parse HEAD') do set COMMIT_HASH=%%i
   - if NOT "%APPVEYOR_REPO_COMMIT%" == "%COMMIT_HASH%" echo "Appveyor hash does not match checkout out hash" && exit 1
