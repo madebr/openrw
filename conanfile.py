@@ -41,6 +41,7 @@ class OpenrwConan(ConanFile):
         ),
         'tools': (
             'freetype/2.9.0@bincrafters/stable',
+            'yaml-cpp/0.6.2@bincrafters/stable',
         ),
     }
 
