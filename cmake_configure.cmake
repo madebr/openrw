@@ -20,6 +20,10 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
             "_SCL_SECURE_NO_WARNINGS"
             "_CRT_SECURE_NO_WARNINGS"
         )
+    target_compile_options(rw_interface
+        INTERFACE
+            "/sdl"
+        )
 else()
     message(FATAL_ERROR "Unknown compiler ID: '${CMAKE_CXX_COMPILER_ID}'")
 endif()
@@ -183,5 +187,12 @@ function(openrw_target_apply_options)
             FIX "${CHECK_CLANGTIDY_FIX}"
             CHECK_ALL
         )
+    endif()
+
+    if(MSVC)
+        set_target_properties("${OPENRW_APPLY_TARGET}"
+            PROPERTIES
+                VS_GLOBAL_RunCodeAnalysis true
+            )
     endif()
 endfunction()
