@@ -1,0 +1,6 @@
+[submodule "external/librw/librw"]
+	path = external/librw/librw
+	url = git@github.com:aap/librw.git
+[submodule "external/librwgta/librwgta"]
+	path = external/librwgta/librwgta
+	url = git@github.com:aap/librwgta.git
