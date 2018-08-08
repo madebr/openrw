@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 
+#include <GL/glew.h>
 #include <gl/DrawBuffer.hpp>
 #include <gl/GeometryBuffer.hpp>
 #include <gl/TextureData.hpp>

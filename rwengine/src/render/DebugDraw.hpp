@@ -14,6 +14,7 @@
 #endif
 
 #include "render/OpenGLRenderer.hpp"
+#include <GL/glew.h>
 
 class btVector3;
 class DrawBuffer;

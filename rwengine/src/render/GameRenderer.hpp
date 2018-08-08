@@ -6,6 +6,7 @@
 
 #include <gl/DrawBuffer.hpp>
 #include <gl/GeometryBuffer.hpp>
+#include <GL/glew.h>
 
 #include <rw/forward.hpp>
 

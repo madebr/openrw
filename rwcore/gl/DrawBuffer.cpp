@@ -2,7 +2,7 @@
 
 #include <map>
 
-#include <gl/gl_core_3_3.h>
+#include <GL/glew.h>
 #include <gl/GeometryBuffer.hpp>
 
 DrawBuffer::DrawBuffer() : vao(0) {

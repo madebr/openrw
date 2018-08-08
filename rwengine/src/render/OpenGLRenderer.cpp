@@ -230,7 +230,11 @@ static bool supportsShaders() {
 
 OpenGLRenderer::OpenGLRenderer() {
     // We need to query for some profiling exts.
-    ogl_CheckExtensions();
+    GLenum err = glewInit();
+    if (err != GLEW_OK) {
+        RW_ERROR("glewInit() failed: " << glewGetErrorString(err));
+        throw std::runtime_error(reinterpret_cast<const char *>(glewGetErrorString(err)));
+    }
 
     if (!supportsShaders()) {
         std::cerr << "ERROR: OpenGL implementation does not support shader compilation (throw?)\n";

@@ -1,7 +1,7 @@
 #ifndef _LIBRW_TEXTUREDATA_HPP_
 #define _LIBRW_TEXTUREDATA_HPP_
 
-#include <gl/gl_core_3_3.h>
+#include <GL/glew.h>
 #include <glm/vec2.hpp>
 
 #include <map>
