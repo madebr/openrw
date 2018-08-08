@@ -14,6 +14,7 @@
 #endif
 
 #include "render/OpenGLRenderer.hpp"
+#include <glad/glad.h>
 
 class btVector3;
 class DrawBuffer;

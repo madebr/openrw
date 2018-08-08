@@ -230,7 +230,11 @@ static bool supportsShaders() {
 
 OpenGLRenderer::OpenGLRenderer() {
     // We need to query for some profiling exts.
-    ogl_CheckExtensions();
+    int ok = gladLoadGL();
+    if (!ok) {
+        RW_ERROR("gladLoadGL() failed");
+        throw std::runtime_error("gladLoadGL() failed");
+    }
 
     if (!supportsShaders()) {
         std::cerr << "ERROR: OpenGL implementation does not support shader compilation (throw?)\n";

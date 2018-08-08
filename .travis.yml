@@ -35,7 +35,9 @@ matrix:
       - brew upgrade python
       - brew upgrade
       - brew install boost cmake bullet ffmpeg glm openal-soft qt5 sdl2 jack freetype
-      - export PATH="/usr/local/opt/qt/bin:$PATH"
+      - PYUSERBASE=$(python3 -m site --user-base)
+      - export PATH="/usr/local/opt/qt/bin:$PYUSERBASE/bin:$PATH"
+      - echo "PATH=$PATH"
     script:
       - mkdir -p "$TRAVIS_BUILD_DIR/build"
       - ctest -VV -S "$TRAVIS_BUILD_DIR/cmake/ctest/script_ci.ctest"

@@ -1,7 +1,7 @@
 #ifndef _LIBRW_DRAWBUFFER_HPP_
 #define _LIBRW_DRAWBUFFER_HPP_
 
-#include <gl/gl_core_3_3.h>
+#include <glad/glad.h>
 
 class GeometryBuffer;
 

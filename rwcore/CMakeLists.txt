@@ -1,7 +1,5 @@
 add_library(rwcore
     # GL stuff is only here temporarily, hoping to move it back to rwengine
-    gl/gl_core_3_3.c
-    gl/gl_core_3_3.h
     gl/DrawBuffer.hpp
     gl/DrawBuffer.cpp
     gl/GeometryBuffer.hpp
@@ -61,6 +59,7 @@ target_link_libraries(rwcore
         Boost::boost
         glm::glm
         openrw::interface
+        glad_gl33core
     PRIVATE
         OpenGL::GL
     )
@@ -68,7 +67,6 @@ target_link_libraries(rwcore
 openrw_target_apply_options(TARGET rwcore
     CORE
     COVERAGE
-    COVERAGE_EXCEPT gl/gl_core_3_3.c gl/gl_core_3_3.h
     )
 
 if(BUILD_SHARED_LIBS)

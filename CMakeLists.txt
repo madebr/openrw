@@ -74,6 +74,14 @@ endif()
 # Create a rw_interface TARGET that holds all compiler options
 include("${PROJECT_SOURCE_DIR}/cmake_configure.cmake")
 
+include(GenerateGlad)
+glad_add_library(glad_gl33core
+    LOCATION "${PROJECT_SOURCE_DIR}/external/glad_gl33_core"
+    SPEC gl
+    PROFILE core
+    API "gl=3.3"
+    )
+
 add_subdirectory(external)
 
 add_subdirectory(rwcore)

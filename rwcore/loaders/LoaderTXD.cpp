@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 
-#include "gl/gl_core_3_3.h"
+#include <glad/glad.h>
 #include "loaders/RWBinaryStream.hpp"
 #include "platform/FileHandle.hpp"
 #include "rw/debug.hpp"

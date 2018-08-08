@@ -73,6 +73,25 @@ if(BUILD_TYPE_INDEX EQUAL -1)
     message(FATAL_ERROR "Unknown build type '${BUILD_TYPE}'")
 endif()
 
+find_program(GLAD_BIN
+    NAMES glad
+    HINTS "$ENV{HOME}/.local/bin"
+    )
+
+if(NOT GLAD_BIN)
+    message(STATUS "glad not found: installing")
+    execute_process(
+        COMMAND python -m pip install --user glad
+        )
+    find_program(GLAD_BIN
+        NAMES glad
+        HINTS "$ENV{HOME}/.local/bin"
+        )
+    if(NOT GLAD_BIN)
+        message(FATAL_ERROR "glad not found after installation")
+    endif()
+endif()
+
 if(USE_CONAN)
     find_program(CONAN_BIN
         NAMES conan

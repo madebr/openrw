@@ -6,6 +6,7 @@ RUN dnf install -y https://download1.rpmfusion.org/free/fedora/rpmfusion-free-re
 
 RUN dnf update -y \
     && dnf install -y \
+        python3-pip \
         boost-devel \
         gcc \
         gcc-c++ \
