@@ -8,7 +8,7 @@
 #include <data/Clump.hpp>
 #include <gl/DrawBuffer.hpp>
 #include <gl/GeometryBuffer.hpp>
-#include <GL/glew.h>
+#include <glad/glad.h>
 #include <rw/debug.hpp>
 
 #include "render/GameRenderer.hpp"

@@ -32,10 +32,6 @@ function(rwdep_wrap_find_packages)
         rwdep_wrap_find_package(SDL2 "${SDL2_INCLUDE_DIR}" "${SDL2_LIBRARY}")
     endif()
 
-    if(GLEW_FOUND)
-        rwdep_wrap_find_package(GLEW "${GLEW_INCLUDE_DIR}" "${GLEW_LIBRARY}")
-    endif()
-
     if(Boost_FOUND)
         rwdep_wrap_find_package(boost "${Boost_INCLUDE_DIRS}" "")
     endif()

@@ -6,6 +6,7 @@ RUN dnf install -y https://download1.rpmfusion.org/free/fedora/rpmfusion-free-re
 
 RUN dnf update -y \
     && dnf install -y \
+        python3-pip \
         boost-devel \
         gcc gcc-c++ \
         boost-devel \
@@ -16,7 +17,6 @@ RUN dnf update -y \
         glm-devel \
         openal-soft-devel \
         SDL2-devel \
-        glew-devel \
         qt5-devel \
         freetype-devel \
         libasan

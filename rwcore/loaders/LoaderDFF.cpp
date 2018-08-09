@@ -11,7 +11,7 @@
 #include <glm/glm.hpp>
 
 #include "data/Clump.hpp"
-#include "GL/glew.h"
+#include <glad/glad.h>
 #include "loaders/RWBinaryStream.hpp"
 #include "platform/FileHandle.hpp"
 #include "rw/debug.hpp"

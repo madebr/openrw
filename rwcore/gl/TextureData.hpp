@@ -1,6 +1,6 @@
 #ifndef _LIBRW_TEXTUREDATA_HPP_
 #define _LIBRW_TEXTUREDATA_HPP_
-#include <GL/glew.h>
+#include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <map>
 

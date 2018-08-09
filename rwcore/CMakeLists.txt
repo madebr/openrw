@@ -52,7 +52,7 @@ target_link_libraries(rwcore
         rwdep::boost
         rwdep::glm
         openrw::interface
-        rwdep::GLEW
+        glad_gl33core
     PRIVATE
         OpenGL::GL
     )

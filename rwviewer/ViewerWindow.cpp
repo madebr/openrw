@@ -17,7 +17,7 @@
 #include <QWindow>
 #include <QMessageBox>
 
-#include <GL/glew.h>
+#include <glad/glad.h>
 
 static int MaxRecentGames = 5;
 
@@ -83,9 +83,9 @@ bool ViewerWindow::setupEngine() {
     if (!makeCurrent()) {
         return false;
     }
-    GLenum err = glewInit();
-    if (err != GLEW_OK) {
-        auto msg = QString{"Failed to load OpenGl\n"} + reinterpret_cast<const char *>(glewGetErrorString(err));
+    int ok = gladLoadGL();
+    if (!ok) {
+        auto msg = QString{"Failed to load OpenGl\n"};
         QMessageBox::critical(this, "OpenGL Failure",
                               msg);
         QApplication::exit(1);

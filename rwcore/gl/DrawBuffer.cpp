@@ -2,7 +2,7 @@
 
 #include <map>
 
-#include <GL/glew.h>
+#include <glad/glad.h>
 #include <gl/GeometryBuffer.hpp>
 
 /* TODO: Come up with a more elegant solution to "WHICH ARRAY IS IT?" */

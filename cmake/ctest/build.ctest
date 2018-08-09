@@ -67,6 +67,25 @@ endif()
 message(STATUS "Starting test...")
 ctest_start("${MODEL_NAME}" ${_CTEST_START_EXTRA_ARGS})
 
+find_program(GLAD_BIN
+    NAMES glad
+    HINTS "$ENV{HOME}/.local/bin"
+    )
+
+if(NOT GLAD_BIN)
+    message(STATUS "glad not found: installing")
+    execute_process(
+        COMMAND pip3 install --user glad
+        )
+    find_program(GLAD_BIN
+        NAMES glad
+        HINTS "$ENV{HOME}/.local/bin"
+        )
+    if(NOT GLAD_BIN)
+        message(FATAL_ERROR "glad not found after installation")
+    endif()
+endif()
+
 if(USE_CONAN)
     find_program(CONAN_BIN
         NAMES conan

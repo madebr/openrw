@@ -2,7 +2,8 @@ FROM base/archlinux
 
 RUN pacman -Syy --noconfirm \
     core/gcc \
-    make \
+    core/make \
+    extra/python-pip \
     extra/boost \
     extra/cmake \
     extra/ffmpeg \
@@ -10,7 +11,6 @@ RUN pacman -Syy --noconfirm \
     community/glm \
     extra/openal \
     extra/sdl2 \
-    extra/glew \
     extra/qt5-base \
     extra/freetype2
 

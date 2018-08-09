@@ -7,7 +7,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 
-#include <GL/glew.h>
+#include <glad/glad.h>
 #include <gl/TextureData.hpp>
 
 #include "engine/GameData.hpp"

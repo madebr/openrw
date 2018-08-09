@@ -87,9 +87,9 @@ public:
         window.hideCursor();
 
 #if RW_TEST_WITH_DATA
-        GLenum err = glewInit();
-        if (err != GLEW_OK) {
-            throw std::runtime_error(std::string{"Failed to load OpenGL.\n"} + reinterpret_cast<const char *>(glewGetErrorString(err)));
+        int ok = gladLoadGL();
+        if (!ok) {
+            throw std::runtime_error("gladLoadGL() failed");
         }
 
         d = new GameData(&log, getGamePath());

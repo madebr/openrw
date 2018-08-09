@@ -10,7 +10,7 @@
 
 #include <glm/glm.hpp>
 
-#include <GL/glew.h>
+#include <glad/glad.h>
 #include <gl/GeometryBuffer.hpp>
 
 class DrawBuffer;

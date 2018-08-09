@@ -1,6 +1,6 @@
 #ifndef _LIBRW_GEOMETRYBUFFER_HPP_
 #define _LIBRW_GEOMETRYBUFFER_HPP_
-#include <GL/glew.h>
+#include <glad/glad.h>
 #include <vector>
 
 /**
