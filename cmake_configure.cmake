@@ -1,6 +1,10 @@
 add_library(rw_interface INTERFACE)
 add_library(openrw::interface ALIAS rw_interface)
 
+add_library(rw_checks INTERFACE)
+add_library(openrw::checks ALIAS rw_checks)
+target_link_libraries(rw_interface INTERFACE rw_checks)
+
 # target_compile_features(rw_interface INTERFACE cxx_std_14) is not supported by CMake 3.2
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -130,13 +134,13 @@ if(TEST_COVERAGE)
         message("TEST_COVERAGE enabled. Enabling BUILD_TESTS.")
         set(BUILD_TESTS "ON")
     endif()
-    target_compile_options(rw_interface
+    target_compile_options(rw_checks
         INTERFACE
             "-O0"
             "-fprofile-arcs"
             "-ftest-coverage"
         )
-    target_link_libraries(rw_interface
+    target_link_libraries(rw_checks
         INTERFACE
             gcov
         )
@@ -145,20 +149,20 @@ endif()
 foreach(SAN ${ENABLE_SANITIZERS})
     if(SAN STREQUAL "address")
         message(STATUS "Address sanitizer enabled.")
-        target_compile_options(rw_interface INTERFACE "-fsanitize=address")
-        target_link_libraries(rw_interface INTERFACE "-fsanitize=address")
+        target_compile_options(rw_checks INTERFACE "-fsanitize=address")
+        target_link_libraries(rw_checks INTERFACE "-fsanitize=address")
     elseif(SAN STREQUAL "leak")
         message(STATUS "Leak sanitizer enabled.")
-        target_compile_options(rw_interface INTERFACE "-fsanitize=leak")
-        target_link_libraries(rw_interface INTERFACE "-fsanitize=leak")
+        target_compile_options(rw_checks INTERFACE "-fsanitize=leak")
+        target_link_libraries(rw_checks INTERFACE "-fsanitize=leak")
     elseif(SAN STREQUAL "thread")
         message(STATUS "Thread sanitizer enabled.")
-        target_compile_options(rw_interface INTERFACE "-fsanitize=thread")
-        target_link_libraries(rw_interface INTERFACE "-fsanitize=thread")
+        target_compile_options(rw_checks INTERFACE "-fsanitize=thread")
+        target_link_libraries(rw_checks INTERFACE "-fsanitize=thread")
     elseif(SAN STREQUAL "undefined")
         message(STATUS "Undefined behaviour sanitizer enabled.")
-        target_compile_options(rw_interface INTERFACE "-fsanitize=undefined")
-        target_link_libraries(rw_interface INTERFACE "-fsanitize=undefined")
+        target_compile_options(rw_checks INTERFACE "-fsanitize=undefined")
+        target_link_libraries(rw_checks INTERFACE "-fsanitize=undefined")
     else()
         message(FATAL_ERROR "Illegal sanitizer: ${SAN}")
     endif()
