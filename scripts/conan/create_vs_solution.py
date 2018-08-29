@@ -41,6 +41,7 @@ def create_solution(path, vs_version, arch):
     subprocess.run([
         'cmake', '-DUSE_CONAN=TRUE', '-DBOOST_STATIC=TRUE',
         '-DBUILD_TESTS=TRUE', '-DBUILD_VIEWER=TRUE', '-DBUILD_TOOLS=TRUE',
+        '-DMSVC_PARALLEL_BUILD=TRUE',
         '-G{}'.format(cmake_generator), str(openrw_path),
     ], cwd=path, check=True)
 
