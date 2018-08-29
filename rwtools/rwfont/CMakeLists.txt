@@ -1,4 +1,3 @@
-find_package(Qt5 REQUIRED COMPONENTS Gui)
 add_executable(rwfontmap
     rwfontmap.cpp
     )

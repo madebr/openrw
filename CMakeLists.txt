@@ -37,6 +37,11 @@ else()
     endif()
     if(BUILD_TOOLS)
         find_package(Freetype REQUIRED)
+        find_package(Qt5Gui REQUIRED)
+    endif()
+    if(BUILD_VIEWER)
+        find_package(Qt5OpenGL REQUIRED)
+        find_package(Qt5Widgets REQUIRED)
     endif()
 
     # Do not link to SDL2main library
