@@ -22,7 +22,8 @@ else()
     message(FATAL_ERROR "Unknown platform (${PLATFORM})")
 endif()
 
-set(CONFIGURE_EXTRA_OPTIONS ";")
+set(CONFIGURE_EXTRA_OPTIONS "MSVC_PARALLEL_BUILD=TRUE")
+set(BUILD_EXTRA_FLAGS "")
 
 if(CONFIGURATION STREQUAL "Debug")
     set(DEBUG TRUE)
