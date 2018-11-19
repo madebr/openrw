@@ -1,8 +1,8 @@
 #include <boost/test/unit_test.hpp>
 #include <data/WeaponData.hpp>
 #include <loaders/GenericDATLoader.hpp>
-#include <objects/PickupObject.hpp>
 #include <objects/InstanceObject.hpp>
+#include <objects/PickupObject.hpp>
 #include "test_Globals.hpp"
 
 // Tests against loading various data files
@@ -17,7 +17,7 @@ BOOST_AUTO_TEST_CASE(test_weapon_dat) {
 
     l.loadWeapons(Global::get().getGamePath() + "/data/weapon.dat", weaponData);
 
-    BOOST_ASSERT(weaponData.size() > 0);
+    BOOST_ASSERT(!weaponData.empty());
 
     WeaponDataPtr data = weaponData[0];
 
@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE(test_dynamic_dat_loader) {
     l.loadDynamicObjects(Global::get().getGamePath() + "/data/object.dat",
                          loaded);
 
-    BOOST_ASSERT(loaded.size() > 0);
+    BOOST_ASSERT(!loaded.empty());
 
     BOOST_ASSERT(loaded.find("wastebin") != loaded.end());
     BOOST_ASSERT(loaded.find("lamppost1") != loaded.end());
@@ -74,7 +74,7 @@ BOOST_AUTO_TEST_CASE(test_handling_data_loader) {
 
     l.loadHandling(Global::get().getGamePath() + "/data/handling.cfg", loaded);
 
-    BOOST_ASSERT(loaded.size() > 0);
+    BOOST_ASSERT(!loaded.empty());
     BOOST_ASSERT(loaded.find("STINGER") != loaded.end());
 
     VehicleInfoPtr info = loaded["STINGER"];
