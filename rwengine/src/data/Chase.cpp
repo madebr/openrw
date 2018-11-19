@@ -1,7 +1,7 @@
 #include "data/Chase.hpp"
 
-#include <cstdint>
 #include <cstddef>
+#include <cstdint>
 #include <fstream>
 
 #include <rw/debug.hpp>
@@ -62,7 +62,7 @@ bool ChaseKeyframe::load(const std::string &filePath,
         };
         glm::mat3 rotation(right, up, glm::cross(right, up));
         frames.emplace_back(velocity, rec.steering, rec.driving, rec.braking,
-                            !!rec.handbrake, rec.position,
+                            !(rec.handbrake == 0u), rec.position,
                             glm::quat_cast(rotation));
     }
 
@@ -100,7 +100,9 @@ void ChaseCoordinator::update(float dt) {
     for (auto &it : chaseVehicles) {
         RW_CHECK(frameNum < it.second.keyframes.size(),
                  "Vehicle out of chase keyframes");
-        if (frameNum >= it.second.keyframes.size()) continue;
+        if (frameNum >= it.second.keyframes.size()) {
+            continue;
+        }
 
         const ChaseKeyframe &kf = it.second.keyframes[frameNum];
         it.second.object->setPosition(kf.position);

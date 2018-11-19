@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <string>
+#include <utility>
 
 #ifdef _MSC_VER
 #pragma warning(disable : 4305 5033)
@@ -22,10 +23,10 @@
 InstanceObject::InstanceObject(GameWorld* engine, const glm::vec3& pos,
                                const glm::quat& rot, const glm::vec3& scale,
                                BaseModelInfo* modelinfo,
-                               const std::shared_ptr<DynamicObjectData>& dyn)
+                               std::shared_ptr<DynamicObjectData> dyn)
     : GameObject(engine, pos, rot, modelinfo)
     , scale(scale)
-    , dynamics(dyn) {
+    , dynamics(std::move(dyn)) {
     if (!modelinfo) {
         return;
     }
@@ -69,7 +70,9 @@ void InstanceObject::tick(float dt) {
 }
 
 void InstanceObject::tickPhysics(float dt) {
-    if (animator) animator->tick(dt);
+    if (animator) {
+        animator->tick(dt);
+    }
 
     if (!body || !dynamics) {
         return;
@@ -215,16 +218,16 @@ void InstanceObject::setStatic(bool s) {
     static_ = s;
 }
 
-bool InstanceObject::takeDamage(const GameObject::DamageInfo& dmg) {
+bool InstanceObject::takeDamage(const GameObject::DamageInfo& damage) {
     if (!dynamics) {
         return false;
     }
 
     const auto effect = dynamics->collDamageEffect;
 
-    if (dmg.hitpoints > 0.f) {
-        if (effect || dynamics->collResponseFlags) {
-            if (dmg.impulse >= dynamics->uprootForce && !isStatic()) {
+    if (damage.hitpoints > 0.f) {
+        if ((effect != 0u) || (dynamics->collResponseFlags != 0u)) {
+            if (damage.impulse >= dynamics->uprootForce && !isStatic()) {
                 usePhysics = true;
             }
         }

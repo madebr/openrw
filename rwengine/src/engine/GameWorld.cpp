@@ -13,8 +13,8 @@
 
 #include <data/Clump.hpp>
 
-#include "core/Profiler.hpp"
 #include "core/Logger.hpp"
+#include "core/Profiler.hpp"
 
 #include "engine/GameData.hpp"
 #include "engine/GameState.hpp"
@@ -63,7 +63,8 @@ bool shouldEffectBeRemoved(const T& effect, float gameTime) {
 
 class WorldCollisionDispatcher : public btCollisionDispatcher {
 public:
-    WorldCollisionDispatcher(btCollisionConfiguration* collisionConfiguration)
+    explicit WorldCollisionDispatcher(
+        btCollisionConfiguration* collisionConfiguration)
         : btCollisionDispatcher(collisionConfiguration) {
     }
 
@@ -118,11 +119,8 @@ bool GameWorld::placeItems(const std::string& name) {
         }
 
         return true;
-    } else {
-        logger->error("Data", "Failed to load IPL " + name);
-        return false;
     }
-
+    logger->error("Data", "Failed to load IPL " + name);
     return false;
 }
 
@@ -440,7 +438,9 @@ void GameWorld::ObjectPool::insert(std::unique_ptr<GameObject> object) {
         // Find the lowest free GameObjectID.
         GameObjectID availID = 1;
         for (auto& [id, objectPtr] : objects) {
-            if (id == availID) availID++;
+            if (id == availID) {
+                availID++;
+            }
         }
 
         object->setGameObjectID(availID);
@@ -520,7 +520,9 @@ void GameWorld::destroyObject(GameObject* object) {
 
 void GameWorld::destroyObjectQueued(GameObject* object) {
     RW_CHECK(object != nullptr, "destroying a null object?");
-    if (object) deletionQueue.insert(object);
+    if (object) {
+        deletionQueue.insert(object);
+    }
 }
 
 void GameWorld::destroyQueuedObjects() {
@@ -566,7 +568,7 @@ void GameWorld::doWeaponScan(const WeaponScan& scan) {
              "Radius scans not implemented yet");
 
     if (scan.type == WeaponScan::RADIUS) {
-        // TODO
+        // TODO(danhedron):
         // Requires custom ConvexResultCallback
     } else if (scan.type == WeaponScan::HITSCAN) {
         btVector3 from(scan.center.x, scan.center.y, scan.center.z),
@@ -575,10 +577,10 @@ void GameWorld::doWeaponScan(const WeaponScan& scan) {
         btCollisionWorld::ClosestRayResultCallback cb(from, to);
         cb.m_collisionFilterGroup = btBroadphaseProxy::AllFilter;
         dynamicsWorld->rayTest(from, to, cb);
-        // TODO: did any weapons penetrate?
+        // TODO(danhedron): did any weapons penetrate?
 
         if (cb.hasHit()) {
-            GameObject* go = static_cast<GameObject*>(
+            auto go = static_cast<GameObject*>(
                 cb.m_collisionObject->getUserPointer());
             GameObject::DamageInfo di;
             hitEnd = di.damageLocation =
@@ -643,8 +645,12 @@ float GameWorld::getGameTime() const {
 namespace {
 void handleVehicleResponse(GameObject* object, btManifoldPoint& mp, bool isA) {
     bool isVehicle = object->type() == GameObject::Vehicle;
-    if (!isVehicle) return;
-    if (mp.getAppliedImpulse() <= 100.f) return;
+    if (!isVehicle) {
+        return;
+    }
+    if (mp.getAppliedImpulse() <= 100.f) {
+        return;
+    }
 
     btVector3 src, dmg;
     if (isA) {
@@ -690,15 +696,16 @@ bool GameWorld::ContactProcessedCallback(btManifoldPoint& mp, void* body0,
     auto obA = static_cast<btCollisionObject*>(body0);
     auto obB = static_cast<btCollisionObject*>(body1);
 
-    if (!(obA->getUserPointer() && obB->getUserPointer())) {
+    if (!((obA->getUserPointer() != nullptr) &&
+          (obB->getUserPointer() != nullptr))) {
         return false;
     }
 
-    GameObject* a = static_cast<GameObject*>(obA->getUserPointer());
-    GameObject* b = static_cast<GameObject*>(obB->getUserPointer());
+    auto a = static_cast<GameObject*>(obA->getUserPointer());
+    auto b = static_cast<GameObject*>(obB->getUserPointer());
 
-    bool aIsInstance = a && a->type() == GameObject::Instance;
-    bool bIsInstance = b && b->type() == GameObject::Instance;
+    bool aIsInstance = (a != nullptr) && a->type() == GameObject::Instance;
+    bool bIsInstance = (b != nullptr) && b->type() == GameObject::Instance;
 
     bool exactly_one_is_instance = aIsInstance != bIsInstance;
 
@@ -706,17 +713,21 @@ bool GameWorld::ContactProcessedCallback(btManifoldPoint& mp, void* body0,
         InstanceObject* instance = nullptr;
 
         if (aIsInstance) {
-            instance = static_cast<InstanceObject*>(a);
+            instance = dynamic_cast<InstanceObject*>(a);
         } else {
-            instance = static_cast<InstanceObject*>(b);
+            instance = dynamic_cast<InstanceObject*>(b);
         }
 
         handleInstanceResponse(instance, mp, aIsInstance);
     }
 
     // Handle vehicles
-    if (a) handleVehicleResponse(a, mp, true);
-    if (b) handleVehicleResponse(b, mp, false);
+    if (a != nullptr) {
+        handleVehicleResponse(a, mp, true);
+    }
+    if (b != nullptr) {
+        handleVehicleResponse(b, mp, false);
+    }
 
     return true;
 }
@@ -724,25 +735,25 @@ bool GameWorld::ContactProcessedCallback(btManifoldPoint& mp, void* body0,
 void GameWorld::PhysicsTickCallback(btDynamicsWorld* physWorld,
                                     btScalar timeStep) {
     RW_PROFILE_SCOPEC(__func__, MP_CYAN);
-    GameWorld* world = static_cast<GameWorld*>(physWorld->getWorldUserInfo());
+    auto* world = static_cast<GameWorld*>(physWorld->getWorldUserInfo());
 
     RW_PROFILE_COUNTER_SET("physicsTick/vehiclePool", world->vehiclePool.objects.size());
     for (auto& p : world->vehiclePool.objects) {
         RW_PROFILE_SCOPEC("VehicleObject", MP_THISTLE1);
-        auto object = static_cast<VehicleObject*>(p.second.get());
+        auto object = dynamic_cast<VehicleObject*>(p.second.get());
         object->tickPhysics(timeStep);
     }
 
     RW_PROFILE_COUNTER_SET("physicsTick/pedestrianPool", world->pedestrianPool.objects.size());
     for (auto& p : world->pedestrianPool.objects) {
         RW_PROFILE_SCOPEC("CharacterObject", MP_THISTLE1);
-        auto object = static_cast<CharacterObject*>(p.second.get());
+        auto object = dynamic_cast<CharacterObject*>(p.second.get());
         object->tickPhysics(timeStep);
     }
 
     RW_PROFILE_COUNTER_SET("physicsTick/instancePool", world->instancePool.objects.size());
     for (auto& p : world->instancePool.objects) {
-        auto object = static_cast<InstanceObject*>(p.second.get());
+        auto object = dynamic_cast<InstanceObject*>(p.second.get());
         object->tickPhysics(timeStep);
     }
 }
@@ -829,7 +840,7 @@ void GameWorld::loadSpecialCharacter(const unsigned short index,
                              std::to_string(index));
     auto modelid = kFirstSpecialActor + index - 1;
     auto model = data->findModelInfo<PedModelInfo>(modelid);
-    if (model && model->isLoaded()) {
+    if ((model != nullptr) && model->isLoaded()) {
         model->unload();
     }
     std::string lowerName(name);
@@ -844,7 +855,7 @@ void GameWorld::loadSpecialModel(const unsigned short index,
                              std::to_string(index));
     // Tell the HIER model to discard the currently loaded model
     auto model = data->findModelInfo<ClumpModelInfo>(index);
-    if (model && model->isLoaded()) {
+    if ((model != nullptr) && model->isLoaded()) {
         model->unload();
     }
     std::string lowerName(name);
@@ -947,7 +958,7 @@ VehicleObject* GameWorld::tryToSpawnVehicle(VehicleGenerator& gen) {
 
     auto model = data->findModelInfo<VehicleModelInfo>(id);
     RW_ASSERT(model);
-    if (model) {
+    if (model != nullptr) {
         auto info = data->vehicleInfo.find(model->handling_);
         if (info != data->vehicleInfo.end()) {
             const auto& handling = info->second->handling;
@@ -999,8 +1010,8 @@ void GameWorld::clearObjectsWithinArea(const glm::vec3 center,
         // Check if we have any important objects in a vehicle, if we do - don't
         // erase it
         for (auto& seat :
-             static_cast<VehicleObject*>(obj.second.get())->seatOccupants) {
-            auto character = static_cast<CharacterObject*>(seat.second);
+             dynamic_cast<VehicleObject*>(obj.second.get())->seatOccupants) {
+            auto character = dynamic_cast<CharacterObject*>(seat.second);
 
             if (character->getLifetime() == GameObject::PlayerLifetime ||
                 character->getLifetime() == GameObject::MissionLifetime) {
@@ -1046,9 +1057,9 @@ void GameWorld::clearObjectsWithinArea(const glm::vec3 center,
 
 PlayerController* GameWorld::getPlayer() {
     auto object = pedestrianPool.find(state->playerObject);
-    if (object) {
-        auto controller = static_cast<CharacterObject*>(object)->controller;
-        return static_cast<PlayerController*>(controller);
+    if (object != nullptr) {
+        auto controller = dynamic_cast<CharacterObject*>(object)->controller;
+        return dynamic_cast<PlayerController*>(controller);
     }
     return nullptr;
 }

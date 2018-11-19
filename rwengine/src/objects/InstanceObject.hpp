@@ -37,7 +37,7 @@ public:
     InstanceObject(GameWorld* engine, const glm::vec3& pos,
                    const glm::quat& rot, const glm::vec3& scale,
                    BaseModelInfo* modelinfo,
-                   const std::shared_ptr<DynamicObjectData>& dyn);
+                   std::shared_ptr<DynamicObjectData> dyn);
     ~InstanceObject() override;
 
     Type type() const override {
@@ -60,7 +60,7 @@ public:
 
     bool takeDamage(const DamageInfo& damage) override;
 
-    void setSolid(bool s);
+    void setSolid(bool solid);
 
     void setStatic(bool s);
 
