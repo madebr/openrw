@@ -29,15 +29,15 @@ class OpenrwConan(ConanFile):
 
     _rw_dependencies = {
         'game': (
-            'openal/1.18.2@bincrafters/stable',
-            'bullet/2.87@bincrafters/stable',
+            'openal/1.19.0@bincrafters/stable',
+            'bullet3/2.87@bincrafters/stable',
             'glm/0.9.9.1@g-truc/stable',
             'ffmpeg/4.0.2@bincrafters/stable',
-            'sdl2/2.0.8@bincrafters/stable',
+            'sdl2/2.0.9@bincrafters/stable',
             'boost/1.68.0@conan/stable',
         ),
         'viewer': (
-            'Qt/5.11.1@bincrafters/stable',
+            'Qt/5.11.2@bincrafters/stable',
         ),
         'tools': (
             'freetype/2.9.0@bincrafters/stable',
