@@ -44,7 +44,7 @@ public:
         m_glyph_width = width / 16;
         m_glyph_height = height_width_ratio * m_glyph_width;
 
-        int error = FT_Init_FreeType(&m_library);
+        FT_Error error = FT_Init_FreeType(&m_library);
         if (error != 0) {
             ft_error(error);
         }
@@ -52,7 +52,7 @@ public:
 
     ~FontTextureBuffer() {
         for (auto face : m_faces) {
-            int error = FT_Done_Face(face);
+            FT_Error error = FT_Done_Face(face);
             if (error != 0) {
                 ft_error(error);
             }
@@ -71,7 +71,7 @@ public:
     void add_face(const char *path) {
         m_faces.emplace_back();
         FT_Face &face = m_faces.back();
-        int error = FT_New_Face(m_library, path, 0, &face);
+        FT_Error error = FT_New_Face(m_library, path, 0, &face);
         if (error != 0) {
             ft_error(error);
         }
@@ -101,7 +101,7 @@ public:
             std::cerr << "index " << index << " crosses bottom border\n";
         }
 
-        for (unsigned row = 0; row < glyph->bitmap.rows; ++row) {
+        for (auto row = 0u; row < glyph->bitmap.rows; ++row) {
             const unsigned char *buffer = glyph->bitmap.buffer + row * glyph->bitmap.pitch;
             for (unsigned i = 0; i < glyph->bitmap.width; ++i) {
                 bool pixel = ((buffer[i / 8] << (i % 8)) & 0x80) != 0;
@@ -165,7 +165,7 @@ public:
                 if (glyph_index == 0) {
                     continue;
                 }
-                int error = FT_Load_Glyph(face, glyph_index, FT_LOAD_DEFAULT);
+                FT_Error error = FT_Load_Glyph(face, glyph_index, FT_LOAD_DEFAULT);
                 if (error != 0) {
                     ft_error(error);
                 }
