@@ -19,4 +19,5 @@ else()
     set(CHECK_IWYU FALSE)
 endif()
 
+set(BUILD_ARCH "amd64")
 set(CONAN_ARCH "x86_64")
