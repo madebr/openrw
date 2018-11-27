@@ -32,7 +32,7 @@ class OpenrwConan(ConanFile):
             'openal/1.18.2@bincrafters/stable',
             'bullet/2.87@bincrafters/stable',
             'glm/0.9.9.1@g-truc/stable',
-            'ffmpeg/4.0@bincrafters/stable',
+            'ffmpeg/4.0.2@bincrafters/stable',
             'sdl2/2.0.8@bincrafters/stable',
             'boost/1.68.0@conan/stable',
         ),
