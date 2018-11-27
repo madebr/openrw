@@ -4932,7 +4932,7 @@ void opcode_01bc(const ScriptArguments& args, const ScriptObject object, ScriptV
     @arg time Time (ms)
 */
 void opcode_01bd(const ScriptArguments& args, ScriptInt& time) {
-    time = args.getWorld()->getGameTime() * 1000;
+    time = static_cast<int>(args.getWorld()->getGameTime() * 1000);
 }
 
 /**
