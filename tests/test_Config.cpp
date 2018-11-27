@@ -528,7 +528,7 @@ BOOST_AUTO_TEST_CASE(test_config_invalid_empty) {
     const auto &parseResult = config.getParseResult();
     BOOST_CHECK_EQUAL(parseResult.type(),
                       GameConfig::ParseResult::ErrorType::INVALIDCONTENT);
-    BOOST_CHECK_GE(parseResult.getKeysRequiredMissing().size(), 1);
+    BOOST_CHECK_GE(parseResult.getKeysRequiredMissing().size(), 1u);
 }
 
 BOOST_AUTO_TEST_CASE(test_config_invalid_nodir) {

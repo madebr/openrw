@@ -88,10 +88,10 @@ BOOST_AUTO_TEST_CASE(test_ped_groups) {
     const auto& def = gd.pedgroups[0];
     const auto& red = gd.pedgroups[1];
 
-    BOOST_REQUIRE_GE(def.size(), 8);
+    BOOST_REQUIRE_GE(def.size(), 8u);
     BOOST_CHECK_EQUAL(def[0], 30);
 
-    BOOST_REQUIRE_GE(red.size(), 8);
+    BOOST_REQUIRE_GE(red.size(), 8u);
     BOOST_CHECK_EQUAL(red[0], 34);
 }
 #endif

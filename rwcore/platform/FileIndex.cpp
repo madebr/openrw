@@ -64,12 +64,17 @@ FileContentsInfo FileIndex::openFileRaw(const std::string &filePath) const {
 #endif
 
     dfile.seekg(0, std::ios::end);
-    auto length = dfile.tellg();
+    size_t length;
+    if (auto tmp_length = dfile.tellg(); tmp_length < 0) {
+        throw std::runtime_error("Unable to get file size: " + filePath);
+    } else {
+        length = static_cast<size_t>(tmp_length);
+    }
     dfile.seekg(0);
     auto data = std::make_unique<char[]>(length);
     dfile.read(data.get(), length);
 
-    return {std::move(data), static_cast<size_t>(length)};
+    return {std::move(data), length};
 }
 
 void FileIndex::indexArchive(const std::string &archive) {
@@ -124,7 +129,12 @@ FileContentsInfo FileIndex::openFile(const std::string &filePath) {
         }
 
         dfile.seekg(0, std::ios::end);
-        length = dfile.tellg();
+        if (auto tmp_length = dfile.tellg(); tmp_length < 0) {
+            throw std::runtime_error("Unable to get file size: " + filePath);
+        } else {
+            length = static_cast<size_t>(tmp_length);
+        }
+
         dfile.seekg(0);
         data = std::make_unique<char[]>(length);
         dfile.read(data.get(), length);
