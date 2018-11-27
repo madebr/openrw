@@ -37,8 +37,7 @@ const GameConfig::ParseResult &GameConfig::getParseResult() const {
 }
 
 rwfs::path GameConfig::getDefaultConfigPath() {
-#if defined(RW_LINUX) || defined(RW_FREEBSD) || defined(RW_NETBSD) || \
-    defined(RW_OPENBSD)
+#if defined(RW_LINUX) || defined(RW_BSD)
     char *config_home = getenv("XDG_CONFIG_HOME");
     if (config_home != nullptr) {
         return rwfs::path(config_home) / kConfigDirectoryName;
