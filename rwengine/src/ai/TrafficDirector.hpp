@@ -36,7 +36,7 @@ public:
 
 private:
     AIGraph* graph = nullptr;
-    GameWorld* world = nullptr;
+    GameWorld* _world = nullptr;
     float pedDensity = 1.f;
     float carDensity = 1.f;
     size_t maximumPedestrians = 20;

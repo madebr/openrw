@@ -66,7 +66,7 @@ void DefaultAIController::update(float dt) {
                     auto lastTarget = targetNode;
                     targetNode = lastTarget->connections.at(
                         character->engine->getRandomNumber(
-                            0u, lastTarget->connections.size() - 1));
+                            static_cast<size_t>(0u), lastTarget->connections.size() - 1));
                     setNextActivity(std::make_unique<Activities::GoTo>(
                         targetNode->position));
                 } else if (getCurrentActivity() == nullptr) {
@@ -154,7 +154,7 @@ void DefaultAIController::update(float dt) {
                     if (!targetNode) {
                         targetNode = lastTargetNode->connections.at(
                             character->engine->getRandomNumber(
-                                0u, lastTargetNode->connections.size() - 1));
+                                static_cast<size_t>(0u), lastTargetNode->connections.size() - 1));
                     }
 
                     // Check whether the maximum amount of lanes changed and adjust our lane
