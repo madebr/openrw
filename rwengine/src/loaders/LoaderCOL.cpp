@@ -20,13 +20,18 @@ struct ColHeader {
 };
 
 bool LoaderCOL::load(const std::string& path) {
-    std::ifstream file(path.c_str(), std::ios_base::binary);
+    std::ifstream file(path, std::ios_base::binary);
     if (!file.is_open()) {
         return false;
     }
 
     file.seekg(0, std::ios_base::end);
-    size_t length = file.tellg();
+    size_t length;
+    if (auto tmp_length = file.tellg(); tmp_length < 0) {
+        return false;
+    } else {
+        length = static_cast<size_t>(tmp_length);
+    }
     file.seekg(0);
 
     std::vector<char> buffer(length);

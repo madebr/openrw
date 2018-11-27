@@ -20,7 +20,12 @@ bool ChaseKeyframe::load(const std::string &filePath,
     }
 
     chaseFile.seekg(0, std::ios_base::end);
-    size_t fileLength = chaseFile.tellg();
+    size_t fileLength;
+    if (auto tmp_fileLength = chaseFile.tellg(); tmp_fileLength < 0) {
+        return false;
+    } else {
+        fileLength = static_cast<size_t>(tmp_fileLength);
+    }
     chaseFile.seekg(0);
 
     struct ChaseEntryRecord {
