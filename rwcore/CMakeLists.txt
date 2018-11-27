@@ -66,7 +66,9 @@ target_link_libraries(rwcore
         OpenGL::GL
     )
 
-openrw_target_apply_options(TARGET rwcore)
+openrw_target_apply_options(TARGET rwcore
+    CORE
+    )
 
 if(BUILD_SHARED_LIBS)
     install(TARGETS rwcore

@@ -5,11 +5,6 @@ add_library(rw_checks INTERFACE)
 add_library(openrw::checks ALIAS rw_checks)
 target_link_libraries(rw_interface INTERFACE rw_checks)
 
-# target_compile_features(rw_interface INTERFACE cxx_std_14) is not supported by CMake 3.2
-set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
     target_compile_options(rw_interface
         INTERFACE
@@ -184,12 +179,24 @@ endforeach()
 
 function(openrw_target_apply_options)
     set(IWYU_MAPPING "${PROJECT_SOURCE_DIR}/openrw_iwyu.imp")
-    cmake_parse_arguments("ORW" "INSTALL;INSTALL_PDB" "TARGET" "" ${ARGN})
+    cmake_parse_arguments("ORW" "CORE;INSTALL;INSTALL_PDB" "TARGET" "" ${ARGN})
     if(CHECK_IWYU)
         iwyu_check(TARGET "${ORW_TARGET}"
             EXTRA_OPTS
                 "--mapping_file=${IWYU_MAPPING}"
         )
+    endif()
+
+    if(ORW_CORE)
+        set_target_properties("${ORW_TARGET}"
+            PROPERTIES
+                CXX_EXTENSIONS OFF
+                CXX_STANDARD 17
+                CXX_STANDARD_REQUIRED ON
+                C_EXTENSIONS OFF
+                C_STANDARD 99
+                C_STANDARD_REQUIRED ON
+            )
     endif()
 
     if(CHECK_CLANGTIDY)

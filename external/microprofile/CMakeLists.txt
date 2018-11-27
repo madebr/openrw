@@ -21,4 +21,14 @@ target_link_libraries(microprofile
         openrw::checks
 )
 
+set_target_properties(microprofile
+    PROPERTIES
+        CXX_EXTENSIONS OFF
+        CXX_STANDARD 11
+        CXX_STANDARD_REQUIRED ON
+        C_EXTENSIONS OFF
+        C_STANDARD 99
+        C_STANDARD_REQUIRED ON
+    )
+
 add_library(microprofile::microprofile ALIAS microprofile)
