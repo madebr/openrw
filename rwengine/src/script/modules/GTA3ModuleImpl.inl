@@ -7746,7 +7746,7 @@ void opcode_02dd(const ScriptArguments& args, const ScriptString areaName, Scrip
             // @todo verify if the lifetime is actually changed in the original game
             // husho: lifetime is changed to mission object lifetime
             auto randomIndex =
-                args.getWorld()->getRandomNumber(0u, candidateCount);
+                args.getWorld()->getRandomNumber(static_cast<size_t>(0u), candidateCount);
             const auto [candidateId, candidatePtr] = candidates.at(randomIndex);
             auto character = static_cast<CharacterObject*>(candidatePtr);
             character->setLifetime(GameObject::MissionLifetime);
@@ -9954,7 +9954,7 @@ void opcode_0376(const ScriptArguments& args, ScriptVec3 coord,
         zone ? (day ? zone->pedGroupDay : zone->pedGroupNight) : 0;
     const auto& pedGroup = data->pedgroups.at(groupId);
     const auto model =
-        pedGroup.at(args.getWorld()->getRandomNumber(0u, pedGroup.size() - 1));
+        pedGroup.at(args.getWorld()->getRandomNumber(static_cast<size_t>(0u), pedGroup.size() - 1));
     character = world->createPedestrian(model, coord);
     character->applyOffset();
 }

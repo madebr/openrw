@@ -348,7 +348,7 @@ bool Activities::DriveTo::update(CharacterObject *character,
         // Choose the next node randomly
         if(nextTargetNode == nullptr) {
             auto i = character->engine->getRandomNumber(
-                0u, potentialNodes.size() - 1);
+                static_cast<size_t>(0u), potentialNodes.size() - 1);
             nextTargetNode = potentialNodes.at(i);
         }
 

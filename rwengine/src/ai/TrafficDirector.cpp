@@ -169,7 +169,7 @@ std::vector<GameObject*> TrafficDirector::populateNearby(
 
             // Spawn a pedestrian from the available pool
             const auto pedId =
-                peds.at(_world->getRandomNumber(0u, peds.size() - 1));
+                peds.at(_world->getRandomNumber(static_cast<size_t>(0u), peds.size() - 1));
             auto ped = _world->createPedestrian(pedId, spawn->position);
             ped->applyOffset();
             ped->setLifetime(GameObject::TrafficLifetime);
@@ -235,7 +235,7 @@ std::vector<GameObject*> TrafficDirector::populateNearby(
 
             // Spawn a vehicle from the available pool
             const auto carId =
-                cars.at(_world->getRandomNumber(0u, cars.size() - 1));
+                cars.at(_world->getRandomNumber(static_cast<size_t>(0u), cars.size() - 1));
             auto vehicle = _world->createVehicle(carId, next->position + diff + laneOffset, orientation);
             vehicle->applyOffset();
             vehicle->setLifetime(GameObject::TrafficLifetime);
@@ -243,7 +243,7 @@ std::vector<GameObject*> TrafficDirector::populateNearby(
 
             // Spawn a pedestrian and put it into the vehicle
             const auto pedId =
-                peds.at(_world->getRandomNumber(0u, peds.size() - 1));
+                peds.at(_world->getRandomNumber(static_cast<size_t>(0u), peds.size() - 1));
             CharacterObject* character = _world->createPedestrian(pedId, vehicle->getPosition());
             character->setLifetime(GameObject::TrafficLifetime);
             character->setCurrentVehicle(vehicle, 0);
