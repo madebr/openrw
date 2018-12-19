@@ -6195,7 +6195,7 @@ void opcode_0221(const ScriptArguments& args, const ScriptPlayer player, const S
 */
 void opcode_0222(const ScriptArguments& args, const ScriptPlayer player, const ScriptInt health) {
     RW_UNUSED(args);
-    player->getCharacter()->getCurrentState().health = health;
+    player->getCharacter()->getCurrentState().health = static_cast<float>(health);
 }
 
 /**
@@ -6206,7 +6206,7 @@ void opcode_0222(const ScriptArguments& args, const ScriptPlayer player, const S
     @arg health 
 */
 void opcode_0223(const ScriptArguments& args, const ScriptCharacter character, const ScriptInt health) {
-    character->getCurrentState().health = health;
+    character->getCurrentState().health = static_cast<float>(health);
     RW_UNUSED(args);
 }
 
@@ -6231,7 +6231,7 @@ void opcode_0224(const ScriptArguments& args, const ScriptVehicle vehicle, const
 */
 void opcode_0225(const ScriptArguments& args, const ScriptPlayer player, ScriptInt& health) {
     RW_UNUSED(args);
-    health = player->getCharacter()->getCurrentState().health;
+    health = static_cast<int>(player->getCharacter()->getCurrentState().health);
 }
 
 /**
@@ -6243,7 +6243,7 @@ void opcode_0225(const ScriptArguments& args, const ScriptPlayer player, ScriptI
 */
 void opcode_0226(const ScriptArguments& args, const ScriptCharacter character, ScriptInt& health) {
     RW_UNUSED(args);
-    health = character->getCurrentState().health;
+    health = static_cast<int>(character->getCurrentState().health);
 }
 
 /**
@@ -7925,10 +7925,10 @@ void opcode_02e7(const ScriptArguments& args) {
 void opcode_02e8(const ScriptArguments& args, ScriptInt& arg1) {
     auto& cutscene = args.getState()->currentCutscene;
     if (args.getState()->skipCutscene) {
-        arg1 = cutscene ? cutscene->tracks.duration * 1000 : 0.f;
+        arg1 = static_cast<int>(cutscene ? cutscene->tracks.duration * 1000 : 0.f);
     }
     else {
-    	arg1 = (args.getWorld()->getGameTime() - args.getState()->cutsceneStartTime) * 1000;
+        arg1 = static_cast<int>((args.getWorld()->getGameTime() - args.getState()->cutsceneStartTime) * 1000);
     }
 }
 
@@ -7939,10 +7939,10 @@ void opcode_02e8(const ScriptArguments& args, ScriptInt& arg1) {
 */
 bool opcode_02e9(const ScriptArguments& args) {
     if (args.getState()->currentCutscene) {
-    	if (args.getState()->skipCutscene) {
-    		return true;
-    	}
-    	auto time = (args.getWorld()->getGameTime() - args.getWorld()->state->cutsceneStartTime);
+        if (args.getState()->skipCutscene) {
+            return true;
+        }
+        auto time = (args.getWorld()->getGameTime() - args.getWorld()->state->cutsceneStartTime);
         return time >= args.getState()->currentCutscene->tracks.duration;
     }
     return true;
@@ -8597,8 +8597,8 @@ void opcode_030d(const ScriptArguments& args, const ScriptInt progress) {
     @arg distance 
 */
 void opcode_030e(const ScriptArguments& args, const ScriptFloat distance) {
-    if (args.getWorld()->state->gameStats.insaneJumpMaxDistance < distance) {
-        args.getWorld()->state->gameStats.insaneJumpMaxDistance = distance;
+    if (args.getWorld()->state->gameStats.insaneJumpMaxDistance < static_cast<uint32_t>(distance)) {
+        args.getWorld()->state->gameStats.insaneJumpMaxDistance = static_cast<uint32_t>(distance);
     }
 }
 
@@ -8609,8 +8609,8 @@ void opcode_030e(const ScriptArguments& args, const ScriptFloat distance) {
     @arg height 
 */
 void opcode_030f(const ScriptArguments& args, const ScriptFloat height) {
-    if (args.getWorld()->state->gameStats.insaneJumpMaxHeight < height) {
-        args.getWorld()->state->gameStats.insaneJumpMaxHeight = height;
+    if (args.getWorld()->state->gameStats.insaneJumpMaxHeight < static_cast<uint32_t>(height)) {
+        args.getWorld()->state->gameStats.insaneJumpMaxHeight = static_cast<uint32_t>(height);
     }
 }
 
@@ -9568,7 +9568,7 @@ void opcode_035d(const ScriptArguments& args, const ScriptObject object) {
 */
 void opcode_035e(const ScriptArguments& args, const ScriptPlayer player, const ScriptInt arg2) {
     RW_UNUSED(args);
-    player->getCharacter()->getCurrentState().armour = arg2;
+    player->getCharacter()->getCurrentState().armour = static_cast<float>(arg2);
 }
 
 /**
@@ -9580,7 +9580,7 @@ void opcode_035e(const ScriptArguments& args, const ScriptPlayer player, const S
 */
 void opcode_035f(const ScriptArguments& args, const ScriptCharacter character, const ScriptInt arg2) {
     RW_UNUSED(args);
-    character->getCurrentState().armour = arg2;
+    character->getCurrentState().armour = static_cast<float>(arg2);
 }
 
 /**
