@@ -16,6 +16,14 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang
             "$<IF:$<COMPILE_LANGUAGE:CXX>,-Wold-style-cast,>"
         )
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    if(MSVC_NO_DEBUG_RUNTIME)
+        string(REPLACE "/MDd" "/MD" CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG}")
+        string(REPLACE "/MTd" "/MT" CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG}")
+        set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG}" CACHE STRING "C debug flags" FORCE)
+        string(REPLACE "/MDd" "/MD" CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
+        string(REPLACE "/MTd" "/MT" CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
+        set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}" CACHE STRING "CXX debug flags" FORCE)
+    endif()
     target_compile_definitions(rw_checks
         INTERFACE
             "_SCL_SECURE_NO_WARNINGS"
