@@ -6,6 +6,7 @@ option(BUILD_VIEWER "Build GUI data viewer")
 
 option(ENABLE_SCRIPT_DEBUG "Enable verbose script execution")
 option(ENABLE_PROFILING "Enable detailed profiling metrics")
+option(ENABLE_IMGUI "Enable imgui plugin")
 
 option(TESTS_NODATA "Build tests for no-data testing")
 
