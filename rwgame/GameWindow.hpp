@@ -3,6 +3,7 @@
 
 #include <glm/vec2.hpp>
 #include <string>
+#include <tuple>
 #include <SDL.h>
 
 #include <render/GameRenderer.hpp>
@@ -28,6 +29,10 @@ public:
 
     bool isOpen() const {
         return !!window;
+    }
+
+    std::tuple<SDL_Window *, SDL_GLContext> getSDLContext() {
+        return std::make_tuple(window, glcontext);
     }
 };
 
