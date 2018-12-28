@@ -25,6 +25,7 @@ set(TESTS
     Pickup
     Renderer
     RWBStream
+    RWRingBuffer
     SaveGame
     ScriptMachine
     State

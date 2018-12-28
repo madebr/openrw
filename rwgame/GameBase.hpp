@@ -2,6 +2,7 @@
 #define RWGAME_GAMEBASE_HPP
 #include "GameWindow.hpp"
 #include "RWConfig.hpp"
+#include "RWImGui.hpp"
 
 #include <core/Logger.hpp>
 
@@ -24,9 +25,16 @@ public:
         return config;
     }
 
+    const RWRingBufferLog &getRingBufferLog() const {
+        return ringbufferlog;
+    }
+
 protected:
     RWConfig buildConfig(const std::optional<RWArgConfigLayer> &args);
     Logger& log;
+#ifdef RW_IMGUI
+    RWRingBufferLog ringbufferlog;
+#endif
     GameWindow window{};
     RWConfig config{};
 };

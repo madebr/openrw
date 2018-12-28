@@ -15,9 +15,6 @@ add_library(librwgame STATIC
     GameWindow.hpp
     GameWindow.cpp
 
-    RWImGui.cpp
-    RWImGui.hpp
-
     HUDDrawer.hpp
     HUDDrawer.cpp
     MenuSystem.hpp
@@ -75,6 +72,13 @@ if(ENABLE_IMGUI)
     target_compile_definitions(librwgame
         PUBLIC
             RW_IMGUI
+        )
+
+    target_sources(librwgame
+        PRIVATE
+            RWImGui.cpp
+            RWImGui.hpp
+            RWRingBuffer.hpp
         )
 
     target_link_libraries(librwgame

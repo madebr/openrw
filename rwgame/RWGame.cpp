@@ -42,7 +42,10 @@ RWGame::RWGame(Logger& log, const std::optional<RWArgConfigLayer> &args)
     : GameBase(log, args)
     , data(&log, config.gamedataPath())
     , renderer(&log, &data)
-    , imgui(*this) {
+#ifdef RW_IMGUI
+    , imgui(*this)
+#endif
+{
     RW_PROFILE_THREAD("Main");
     RW_TIMELINE_ENTER("Startup", MP_YELLOW);
 
@@ -64,7 +67,9 @@ RWGame::RWGame(Logger& log, const std::optional<RWArgConfigLayer> &args)
                                  config.gamedataPath());
     }
 
+#ifdef RW_IMGUI
     imgui.init();
+#endif
 
     data.load();
 
@@ -442,9 +447,27 @@ bool RWGame::updateInput() {
     RW_PROFILE_SCOPE(__func__);
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
-        if (imgui.process_event(event)) {
-            continue;
+#ifdef RW_IMGUI
+        auto [want_mouse, want_keyboard] = imgui.process_event(event);
+        switch (event.type) {
+            case SDL_KEYDOWN: [[fallthrough]]
+            case SDL_KEYUP:
+                if (want_keyboard) {
+                    continue;
+                }
+                break;
+            case SDL_MOUSEBUTTONUP: [[fallthrough]]
+            case SDL_MOUSEBUTTONDOWN: [[fallthrough]]
+            case SDL_MOUSEMOTION:
+                if (want_mouse) {
+                    continue;
+                }
+                break;
+            default:
+                break;
         }
+#endif
+
         switch (event.type) {
             case SDL_QUIT:
                 return false;
@@ -636,7 +659,9 @@ void RWGame::render(float alpha, float time) {
         stateManager.draw(renderer);
     }
 
+#ifdef RW_IMGUI
     imgui.tick();
+#endif
 }
 
 void RWGame::renderDebugView(float time, ViewCamera &viewCam) {

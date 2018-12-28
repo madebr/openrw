@@ -1,8 +1,10 @@
 #include <core/Logger.hpp>
 
 #include <algorithm>
+#include <array>
 #include <iostream>
-#include <map>
+
+std::array<char, Logger::MessageSeverity::_Count> Logger::severityChar = {{'E', 'W', 'I', 'V'}};
 
 void Logger::log(const std::string& component, Logger::MessageSeverity severity,
                  const std::string& message) {
@@ -38,12 +40,8 @@ void Logger::verbose(const std::string& component, const std::string& message) {
     log(component, Logger::Verbose, message);
 }
 
-std::map<Logger::MessageSeverity, char> severityStr{{Logger::Error, 'E'},
-                                                    {Logger::Warning, 'W'},
-                                                    {Logger::Info, 'I'},
-                                                    {Logger::Verbose, 'V'}};
 
 void StdOutReceiver::messageReceived(const Logger::LogMessage& message) {
-    std::cout << severityStr[message.severity] << " [" << message.component
+    std::cout << Logger::severityChar[message.severity] << " [" << message.component
               << "] " << message.message << std::endl;
 }

@@ -1,6 +1,7 @@
 #ifndef _RWENGINE_LOGGER_HPP_
 #define _RWENGINE_LOGGER_HPP_
 
+#include <array>
 #include <initializer_list>
 #include <string>
 #include <utility>
@@ -13,7 +14,9 @@
  */
 class Logger {
 public:
-    enum MessageSeverity { Verbose, Info, Warning, Error };
+    enum MessageSeverity { Verbose, Info, Warning, Error, _Count};
+    static std::array<char, Logger::MessageSeverity::_Count> severityChar;
+
 
     struct LogMessage {
         /// The component that produced the message
@@ -61,6 +64,7 @@ private:
 };
 
 class StdOutReceiver final : public Logger::MessageReceiver {
+public:
     void messageReceived(const Logger::LogMessage&) override;
 };
 

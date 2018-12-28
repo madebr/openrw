@@ -14,6 +14,7 @@ const std::string kWindowTitle = "RWGame";
 GameBase::GameBase(Logger &inlog, const std::optional<RWArgConfigLayer> &args) :
         log(inlog),
         config(buildConfig(args)) {
+    log.addReceiver(&ringbufferlog);
     log.info("Game", "Build: " + kBuildStr);
 
     bool fullscreen = config.fullscreen();
@@ -83,4 +84,5 @@ GameBase::~GameBase() {
     SDL_Quit();
 
     log.info("Game", "Done cleaning up");
+    log.removeReceiver(&ringbufferlog);
 }

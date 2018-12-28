@@ -33,7 +33,9 @@ class PlayerController;
 class RWGame final : public GameBase {
     GameData data;
     GameRenderer renderer;
+#ifdef RW_IMGUI
     RWImGui imgui;
+#endif
     DebugDraw debug;
     GameState state;
     HUDDrawer hudDrawer{};
