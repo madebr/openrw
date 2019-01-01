@@ -11,21 +11,45 @@
 
 #include <gl/gl_core_3_3.h>
 
+#include <array>
 #include <sstream>
 
 void RWRingBufferLog::messageReceived(const Logger::LogMessage& message) {
     std::ostringstream oss;
     oss << Logger::severityChar[message.severity] << " [" << message.component << "] " << message.message;
-    _log.add(oss.str());
+    _log.add({oss.str(), RWRingBufferLog::Message::MessageLevel(message.severity)});
+    updated = true;
 }
 
-const RWRingBuffer<std::string, RWRingBufferLog::N>& RWRingBufferLog::getRingBuffer() const {
+void RWRingBufferLog::input(const std::string txt) {
+    _log.add({std::move(txt), RWRingBufferLog::Message::MessageLevel::INPUT});
+    updated = true;
+}
+
+void RWRingBufferLog::output(const std::string txt) {
+    _log.add({std::move(txt), RWRingBufferLog::Message::MessageLevel::OUTPUT});
+    updated = true;
+}
+
+const RWRingBuffer<RWRingBufferLog::Message, RWRingBufferLog::N>& RWRingBufferLog::getRingBuffer() const {
     return _log;
 }
 
+static_assert(static_cast<int>(Logger::MessageSeverity::Verbose) == static_cast<int>(RWRingBufferLog::Message::MessageLevel::VERBOSE));
+static_assert(static_cast<int>(Logger::MessageSeverity::Info)    == static_cast<int>(RWRingBufferLog::Message::MessageLevel::INFO));
+static_assert(static_cast<int>(Logger::MessageSeverity::Warning) == static_cast<int>(RWRingBufferLog::Message::MessageLevel::WARNING));
+static_assert(static_cast<int>(Logger::MessageSeverity::Error)   == static_cast<int>(RWRingBufferLog::Message::MessageLevel::ERROR));
+
+
+struct RWImGui::RWImGuiState {
+    bool show_demo_window = false;
+    bool show_log = false;
+    std::array<char, 4096> log_input_buffer;
+};
 
 RWImGui::RWImGui(RWGame &game)
-    : _game(game) {
+    : _game(game)
+    , _state(std::make_unique<RWImGui::RWImGuiState>()) {
 }
 
 RWImGui::~RWImGui() {
@@ -63,33 +87,69 @@ std::tuple<bool, bool> RWImGui::process_event(SDL_Event &event) {
     return std::make_tuple(io.WantCaptureMouse, io.WantCaptureKeyboard);
 }
 
-void log_windowdraw(RWGame& rwgame, bool* open) { // const char* title, bool* p_open = NULL) {
-    ImGui::SetNextWindowSize(ImVec2(500,400), ImGuiCond_FirstUseEver);
+namespace {
+
+const std::array<ImVec4, static_cast<size_t>(RWRingBufferLog::Message::MessageLevel::_Count)> messageColors = {
+    {
+        ImVec4(0.2f, 0.2f, 0.2f, 1.0f),
+        ImVec4(0.4f, 0.4f, 0.4f, 1.0f),
+        ImVec4(0.96f, 0.62f, 0.26f, 1.0f),
+        ImVec4(1.0f, 0.4f, 0.4f, 1.0f),
+        ImVec4(1.0f, 1.0f, 1.0f, 1.0f),
+        ImVec4(0.7f, 0.7f, 0.7f, 1.0f),
+    }};
+
+void log_windowdraw(RWGame& rwgame, bool* open, RWImGui::RWImGuiState &state) { // const char* title, bool* p_open = NULL) {
+    ImGui::SetNextWindowSize(ImVec2(500, 400), ImGuiCond_FirstUseEver);
     if (!ImGui::Begin("OpenRW Log", open)) {
         ImGui::End();
         return;
     }
-    ImGui::BeginChild("Log");
+
+    const float footer_height_to_reserve = ImGui::GetStyle().ItemSpacing.y + ImGui::GetFrameHeightWithSpacing(); // 1 separator, 1 input text
+    ImGui::BeginChild("ConsoleScrollingRegion", ImVec2(0, -footer_height_to_reserve), false, ImGuiWindowFlags_HorizontalScrollbar); // Leave room for 1 separator + 1 InputText
+
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0,0));
     const auto& ring = rwgame.getRingBufferLog().getRingBuffer();
     ImGuiListClipper clipper(ring.size());
     while (clipper.Step()) {
-        for (auto& s : ring.slice(clipper.DisplayStart, clipper.DisplayEnd)) {
-            ImGui::Text(s.c_str());
+        for (auto& msg : ring.slice(clipper.DisplayStart, clipper.DisplayEnd)) {
+            const auto& msgColor = messageColors[static_cast<size_t>(msg.level)];
+            ImGui::PushStyleColor(ImGuiCol_Text, msgColor);
+            ImGui::Text(msg.text.c_str());
+            ImGui::PopStyleColor();
         }
+    }
+    if (rwgame.getRingBufferLog().updated) {
+        ImGui::SetScrollHereY(1.0f);
+        rwgame.getRingBufferLog().updated = false;
     }
     ImGui::PopStyleVar();
     ImGui::EndChild();
+    ImGui::Separator();
+    bool reclaim_focus = false;
+    if (ImGui::InputText("command", state.log_input_buffer.data(), state.log_input_buffer.size(), ImGuiInputTextFlags_EnterReturnsTrue|ImGuiInputTextFlags_CallbackCompletion|ImGuiInputTextFlags_CallbackHistory, nullptr, nullptr))
+    {
+        auto& s = state.log_input_buffer;
+        rwgame.getRingBufferLog().input(std::string("> ") + s.data());
+        rwgame.getRingBufferLog().output(s.data());
+        strcpy(s.data(), "");
+        reclaim_focus = true;
+    }
+    ImGui::SetItemDefaultFocus();
+    if (reclaim_focus) {
+        ImGui::SetKeyboardFocusHere(-1); // Auto focus previous widget
+    }
+
     ImGui::End();
 }
-
+}
 
 void RWImGui::tick() {
     if (!_context) {
         return;
     }
     ImGui::SetCurrentContext(_context);
-    auto& io = ImGui::GetIO();
 
     auto [window, sdl_glcontext] = _game.getWindow().getSDLContext();
 
@@ -97,17 +157,8 @@ void RWImGui::tick() {
     ImGui_ImplSDL2_NewFrame(window);
     ImGui::NewFrame();
 
-    static float f = 0.0f;
-
-    ImGui::Begin("Hello, world!");
-    ImGui::Text("Hello, world!");
-    ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
-    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", static_cast<double>(1000.0f / io.Framerate), static_cast<double>(io.Framerate));   ImGui::End();
-
-    static bool logopen = false;
-    log_windowdraw(_game, &logopen);
-    static bool show_demo_window = true;
-    ImGui::ShowDemoWindow(&show_demo_window);
+    log_windowdraw(_game, &_state->show_log, *_state);
+    ImGui::ShowDemoWindow(&_state->show_demo_window);
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

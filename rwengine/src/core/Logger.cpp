@@ -4,8 +4,6 @@
 #include <array>
 #include <iostream>
 
-std::array<char, Logger::MessageSeverity::_Count> Logger::severityChar = {{'E', 'W', 'I', 'V'}};
-
 void Logger::log(const std::string& component, Logger::MessageSeverity severity,
                  const std::string& message) {
     LogMessage m{component, severity, message};

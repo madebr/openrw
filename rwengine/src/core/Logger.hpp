@@ -14,9 +14,8 @@
  */
 class Logger {
 public:
-    enum MessageSeverity { Verbose, Info, Warning, Error, _Count};
-    static std::array<char, Logger::MessageSeverity::_Count> severityChar;
-
+    enum MessageSeverity { Verbose=0, Info, Warning, Error, _Count};
+    constexpr static std::array<char, MessageSeverity::_Count> severityChar = {{'V', 'I', 'W', 'E'}};
 
     struct LogMessage {
         /// The component that produced the message
@@ -45,7 +44,7 @@ public:
     };
 
     Logger(std::initializer_list<MessageReceiver*> initial = {})
-        : receivers(initial) {
+        : receivers(std::move(initial)) {
     }
 
     void addReceiver(MessageReceiver* out);

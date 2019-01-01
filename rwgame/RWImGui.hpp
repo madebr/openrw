@@ -7,14 +7,19 @@
 
 #include <SDL.h>
 
+#include <memory>
 #include <tuple>
 
 class RWGame;
 struct ImGuiContext;
 
 class RWImGui {
+public:
+    struct RWImGuiState;
+private:
     RWGame &_game;
     ImGuiContext *_context = nullptr;
+    std::unique_ptr<RWImGuiState> _state;
 public:
     RWImGui(RWGame &game);
     ~RWImGui();
@@ -26,11 +31,29 @@ public:
 
 
 class RWRingBufferLog final : public Logger::MessageReceiver {
-static constexpr size_t N = 1024u;
-RWRingBuffer<std::string, N> _log;
 public:
+struct Message {
+    enum MessageLevel {
+        VERBOSE = 0,
+        INFO,
+        WARNING,
+        ERROR,
+        INPUT,
+        OUTPUT,
+        _Count,
+    };
+    std::string text;
+    MessageLevel level;
+};
+private:
+static constexpr size_t N = 1024u;
+RWRingBuffer<Message, N> _log;
+public:
+    bool updated = false;
     void messageReceived(const Logger::LogMessage& message) override;
-    const RWRingBuffer<std::string, N>& getRingBuffer() const;
+    void input(const std::string txt);
+    void output(const std::string txt);
+    const RWRingBuffer<Message, N>& getRingBuffer() const;
 };
 
 #endif // RWGAME_RWIMGUI_HPP

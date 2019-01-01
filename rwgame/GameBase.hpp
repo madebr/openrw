@@ -25,7 +25,7 @@ public:
         return config;
     }
 
-    const RWRingBufferLog &getRingBufferLog() const {
+    RWRingBufferLog &getRingBufferLog() {
         return ringbufferlog;
     }
 
