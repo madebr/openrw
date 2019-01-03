@@ -30,6 +30,7 @@ docker=$1
         USE_CONAN=$USE_CONAN \
         TEST_COVERAGE=$TEST_COVERAGE \
         ALSOFT_DRIVERS=null \
+        BUILD_PYTHON=$BUILD_PYTHON \
         CC=$CC \
         CXX=$CXX \
         DEBUG=$DEBUG \

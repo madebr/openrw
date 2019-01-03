@@ -15,6 +15,7 @@ environment:
   CMAKE_GENERATOR_BASE: "Visual Studio 15 2017"
   NAME_SUFFIX: "windows"
   USE_CONAN: 1
+  BUILD_PYTHON: 1
 
 platform:
   - x64

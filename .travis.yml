@@ -4,13 +4,13 @@ matrix:
   include:
   - os: linux
     compiler: gcc
-    env: NAME="Ubuntu Linux (Latest)" NAME_SUFFIX="ubuntu" TEST_COVERAGE=1
+    env: NAME="Ubuntu Linux (Latest)" NAME_SUFFIX="ubuntu" TEST_COVERAGE=1 BUILD_PYTHON=1
     services: docker
     script:
       - scripts/docker/docker_travis.sh "ubuntu_latest.docker"
   - os: linux
     compiler: clang
-    env: NAME="Fedora Linux (Latest)" NAME_SUFFIX="fedora-llvm" TEST_COVERAGE=1
+    env: NAME="Fedora Linux (Latest)" NAME_SUFFIX="fedora-llvm" TEST_COVERAGE=1 BUILD_PYTHON=1
     services: docker
     script:
       - scripts/docker/docker_travis.sh "fedora_latest.docker"
@@ -22,19 +22,19 @@ matrix:
       - scripts/docker/docker_travis.sh "arch_latest.docker"
   - os: linux
     compiler: gcc
-    env: NAME="conan" NAME_SUFFIX="conan" USE_CONAN=1
+    env: NAME="conan" NAME_SUFFIX="conan" USE_CONAN=1 BUILD_PYTHON=1
     script:
       - scripts/docker/docker_travis.sh "conan_base.docker"
   - os: osx
     compiler: clang
-    env: NAME="Apple macOS" NAME_SUFFIX="mac"
+    env: NAME="Apple macOS" NAME_SUFFIX="mac" BUILD_PYTHON=1
     osx_image: xcode10.1
     install:
       - brew update
       - /usr/bin/yes | pip2 uninstall numpy  # see https://github.com/travis-ci/travis-ci/issues/6688
       - brew upgrade python
       - brew upgrade
-      - brew install boost cmake bullet ffmpeg glm openal-soft qt5 sdl2 jack freetype
+      - brew install boost cmake bullet ffmpeg glm openal-soft pybind11 qt5 sdl2 jack freetype
       - export PATH="/usr/local/opt/qt/bin:$PATH"
     script:
       - mkdir -p "$TRAVIS_BUILD_DIR/build"
