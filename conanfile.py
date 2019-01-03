@@ -9,16 +9,22 @@ class OpenrwConan(ConanFile):
     description = "OpenRW 'Open ReWrite' is an un-official open source recreation of the classic Grand Theft Auto III game executable"
     settings = 'os', 'compiler', 'build_type', 'arch'
     options = {
+        'shared': [True, False],
+        'fPIC': [True, False],
         'test_data': [True, False],
         'viewer': [True, False],
         'tools': [True, False],
+        'python': [True, False],
         'profiling': [True, False],
     }
 
     default_options = {
+        'shared': False,
+        'fPIC': True,
         'test_data': False,
         'viewer': True,
         'tools': True,
+        'python': True,
         'profiling': True,
         'bullet3:shared': False,
         'sdl2:sdl2main': False,
@@ -44,7 +50,14 @@ class OpenrwConan(ConanFile):
         'tools': (
             'freetype/2.9.0@bincrafters/stable',
         ),
+        'python': (
+            'pybind11/2.2.3@conan/stable',
+        ),
     }
+
+    def config_options(self):
+        if self.settings.compiler == 'Visual Studio':
+            del self.options.fPIC
 
     def configure(self):
         if self.options.viewer:
@@ -59,15 +72,23 @@ class OpenrwConan(ConanFile):
         if self.options.tools:
             for dep in self._rw_dependencies['tools']:
                 self.requires(dep)
+        if self.options.python:
+            for dep in self._rw_dependencies['python']:
+                self.requires(dep)
 
     def _configure_cmake(self):
         cmake = CMake(self)
+        fpic = self.options.python
+        if self.settings.compiler == 'Visual Studio':
+            fpic |= self.options.fPIC
         defs = {
-            'BUILD_SHARED_LIBS': False,
+            'BUILD_SHARED_LIBS': self.options.shared,
             'CMAKE_BUILD_TYPE': self.settings.build_type,
             'BUILD_TESTS': True,
             'BUILD_VIEWER': self.options.viewer,
             'BUILD_TOOLS': self.options.tools,
+            'BUILD_PYTHON': self.options.python,
+            'WITH_PIC': fpic,
             'TESTS_NODATA': not self.options.test_data,
             'ENABLE_PROFILING': self.options.profiling,
             'USE_CONAN': True,
@@ -89,5 +110,5 @@ class OpenrwConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = ['rwengine', 'rwlib']
-        self.cpp_info.stdcpp = 14
+        self.cpp_info.libs = ['rwgame', 'rwengine', 'rwcore']
+        self.cpp_info.stdcpp = 17

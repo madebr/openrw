@@ -24,6 +24,8 @@ RUN apt-get update \
         libfreetype6-dev \
         iwyu \
         qt5-default \
+        python3-dev \
+        pybind11-dev \
     && apt-get clean \
     && update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-7 60 \
     && update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 60 \
