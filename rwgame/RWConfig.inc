@@ -7,6 +7,9 @@
 RWCONFIGARG(std::string,    gamedataPath,   std::nullopt,           "game.path",            CONFIG,     "gamedata",     "PATH",     "Path of gamedata")
 RWARG_OPT(  std::string,    configPath,                                                     CONFIG,     "config,c",     "PATH",     "Path of configuration file")
 RWARG(      bool,           noconfig,                                                       CONFIG,     "noconfig",     nullptr,    "Don't load configuration file")
+#ifdef RW_PYTHON
+RWCONFIGARG(bool,           nopython,       false,                  "game.nopython",        CONFIG,     "nopython",     nullptr,    "Disable python interpreter")
+#endif
 
 RWCONFIGARG(bool,           invertY,        false,                  "input.invert_y",       INPUT,      "invert_y",     nullptr,    "Invert the y-axis of the mouse")
 

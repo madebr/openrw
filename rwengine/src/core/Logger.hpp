@@ -38,6 +38,7 @@ public:
      * The Logger class will not clean up allocated MessageReceivers.
      */
     struct MessageReceiver {
+        virtual ~MessageReceiver() = default;
         virtual void messageReceived(const LogMessage&) = 0;
     };
 

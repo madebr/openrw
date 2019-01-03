@@ -1,5 +1,6 @@
 build/
 documentation/
+*.py[co]
 *.kdev4
 *~
 *swp

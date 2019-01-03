@@ -3,6 +3,11 @@
 #include <rw/debug.hpp>
 #include "GitSHA1.h"
 
+#ifdef RW_PYTHON
+#include <pybind11/embed.h>
+#include "python/pyopenrw.hpp"
+#endif
+
 #include <SDL.h>
 
 #include <iostream>
@@ -15,6 +20,16 @@ GameBase::GameBase(Logger &inlog, const std::optional<RWArgConfigLayer> &args) :
         log(inlog),
         config(buildConfig(args)) {
     log.info("Game", "Build: " + kBuildStr);
+
+#ifdef RW_PYTHON
+    if (!config.nopython()) {
+        log.verbose("Game", "Python support enabled");
+        if (PYOPENRW_EMBEDDED) {
+            python_guard = std::make_unique<pybind11::scoped_interpreter>();
+        }
+        pybind11::module::import(PYOPENRW_STRING);
+    }
+#endif
 
     bool fullscreen = config.fullscreen();
     size_t w = config.width(), h = config.height();

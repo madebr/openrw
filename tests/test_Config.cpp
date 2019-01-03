@@ -699,6 +699,27 @@ BOOST_AUTO_TEST_CASE(test_argParser_bool_invert_y) {
     }
 }
 
+#ifdef RW_PYTHON
+BOOST_AUTO_TEST_CASE(test_argParser_bool_nopython) {
+    RWArgumentParser argParser;
+    {
+        const char *args[] = {""};
+        auto optLayer = argParser.parseArguments(1, args);
+
+        BOOST_REQUIRE(optLayer.has_value());
+        BOOST_CHECK(!optLayer->nopython.has_value());
+    }
+    {
+        const char *args[] = {"", "--nopython"};
+        auto optLayer = argParser.parseArguments(2, args);
+
+        BOOST_REQUIRE(optLayer.has_value());
+        BOOST_REQUIRE(optLayer->nopython.has_value());
+        BOOST_CHECK(*optLayer->nopython);
+    }
+}
+#endif
+
 BOOST_AUTO_TEST_CASE(test_rwconfig_initial) {
     RWConfig config;
     auto missingKeys = config.missingKeys();
