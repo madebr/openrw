@@ -11,6 +11,8 @@ RUN apt-get update \
         llvm \
         lcov \
         curl \
+        # FIXME: conan has no cpython (yet) \
+        python3-dev \
             # scripts to install conan \
             python3-pip \
             python3-distutils \

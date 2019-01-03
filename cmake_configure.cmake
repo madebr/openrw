@@ -167,6 +167,27 @@ endif()
 foreach(SAN ${ENABLE_SANITIZERS})
     if(SAN STREQUAL "address")
         message(STATUS "Address sanitizer enabled.")
+
+        string(REPLACE "." ";" CMAKE_CXX_COMPILER_VERSION_LIST "${CMAKE_CXX_COMPILER_VERSION}")
+        list(GET CMAKE_CXX_COMPILER_VERSION_LIST 0 CMAKE_CXX_COMPILER_VERSION_MAJOR)
+        if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+            string(REPLACE "." ";" CMAKE_CXX_COMPILER_VERSION_LIST "${CMAKE_CXX_COMPILER_VERSION}")
+            list(GET CMAKE_CXX_COMPILER_VERSION_LIST 0 CMAKE_CXX_COMPILER_VERSION_MAJOR)
+            math(EXPR ASAN_VERSION "${CMAKE_CXX_COMPILER_VERSION_MAJOR}-3")
+            set(LIBASAN_NAME_CALCULATED "libasan${CMAKE_SHARED_LIBRARY_SUFFIX}.${ASAN_VERSION}")
+        elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+            math(EXPR ASAN_VERSION "${CMAKE_CXX_COMPILER_VERSION_MAJOR}-2")
+            set(LIBASAN_NAME_CALCULATED "libasan${CMAKE_SHARED_LIBRARY_SUFFIX}.${ASAN_VERSION}")
+        endif()
+        if(LIBASAN_NAME_CALCULATED)
+            find_library(ASAN_LIBRARY "${LIBASAN_NAME_CALCULATED}")
+            message(STATUS "libasan library found: ${ASAN_LIBRARY}")
+            if(NOT ASAN_LIBRARY)
+                message(FATAL_ERROR "libasan library not found: ${LIBASAN_NAME_CALCULATED}")
+            endif()
+            list(APPEND LD_PRELOAD "${ASAN_LIBRARY}")
+        endif()
+
         target_compile_options(rw_checks INTERFACE "-fsanitize=address")
         target_link_libraries(rw_checks INTERFACE "-fsanitize=address")
     elseif(SAN STREQUAL "leak")
@@ -198,6 +219,13 @@ function(openrw_target_apply_options)
 
     if(TEST_COVERAGE AND ORW_COVERAGE)
         coverage_add_target("${ORW_TARGET}" EXCEPT ${ORW_COVERAGE_EXCEPT})
+    endif()
+
+    if(WITH_PIC)
+        set_target_properties("${ORW_TARGET}"
+            PROPERTIES
+                POSITION_INDEPENDENT_CODE ON
+            )
     endif()
 
     if(CHECK_CLANGTIDY)

@@ -26,6 +26,16 @@ function(rwdep_wrap_find_packages)
     endif()
 endfunction()
 
+function(wrap_python_target)
+    if(PYTHONLIBS_FOUND AND NOT TARGET python::libs)
+        add_library(python::libs INTERFACE IMPORTED)
+        set_property(TARGET python::libs
+            PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${PYTHON_INCLUDE_PATH}")
+        set_property(TARGET python::libs
+            PROPERTY INTERFACE_LINK_LIBRARIES "${PYTHON_LIBRARIES}")
+    endif()
+endfunction()
+
 function(rwdep_wrap_conan_target TARGET CONAN_NAME)
     string(RANDOM RND)
     set(TGT "CONAN_${CONAN_NAME}_${RND}")
