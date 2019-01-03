@@ -44,6 +44,23 @@ add_library(librwgame STATIC
     states/BenchmarkState.cpp
     )
 
+if(BUILD_PYTHON)
+    target_sources(librwgame
+        PRIVATE
+            python/pyembed.cpp
+        )
+
+    target_link_libraries(librwgame
+        PRIVATE
+            pyopenrw_private
+        )
+
+    target_compile_definitions(librwgame
+        PUBLIC
+            RW_PYTHON
+        )
+endif()
+
 openrw_target_apply_options(
     TARGET librwgame
     CORE
@@ -60,6 +77,7 @@ target_include_directories(librwgame
     PUBLIC
         "${CMAKE_CURRENT_SOURCE_DIR}"
     )
+
 target_link_libraries(librwgame
     PUBLIC
         openrw::interface
@@ -83,3 +101,48 @@ openrw_target_apply_options(
     COVERAGE
     INSTALL INSTALL_PDB
     )
+
+if(BUILD_PYTHON)
+    add_library(pyopenrw_private STATIC
+        python/pyopenrw_priv.hpp
+        python/pyopenrw.hpp
+        python/module.cpp
+        python/logging.cpp
+        python/config.cpp
+        )
+    target_link_libraries(pyopenrw_private
+        PUBLIC
+            pybind11::module
+            python::libs
+            librwgame
+        )
+    target_include_directories(pyopenrw_private
+        INTERFACE
+            "${CMAKE_CURRENT_LIST_DIR}/python"
+        )
+    openrw_target_apply_options(
+        TARGET pyopenrw_private
+        CORE
+        COVERAGE
+        )
+    add_library(pyopenrw MODULE
+        python/pymain.cpp
+        )
+    target_link_libraries(pyopenrw
+        PUBLIC
+            pyopenrw_private
+        )
+    set_target_properties(pyopenrw
+        PROPERTIES
+            OUTPUT_NAME "openrw"
+            PREFIX "${PYTHON_MODULE_PREFIX}"
+            SUFFIX "${PYTHON_MODULE_EXTENSION}"
+        )
+
+    openrw_target_apply_options(
+        TARGET pyopenrw
+        CORE
+        COVERAGE
+        INSTALL INSTALL_PDB
+        )
+endif()

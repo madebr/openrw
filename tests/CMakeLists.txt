@@ -49,6 +49,16 @@ foreach(TEST ${TESTS})
     list(APPEND TEST_SOURCES "test_${TEST}.cpp")
 endforeach()
 
+if(BUILD_PYTHON)
+    set(PYTHON_TEST_MODULES
+        test_Logger
+        )
+
+    foreach(PYTHON_TEST_MODULE ${PYTHON_TEST_MODULES})
+        list(APPEND TEST_SOURCES "${PYTHON_TEST_MODULE}.py")
+    endforeach()
+endif()
+
 add_executable(rwtests
     ${TEST_SOURCES}
     )
@@ -88,6 +98,19 @@ if(SEPARATE_TEST_SUITES)
                 TIMEOUT 300
             )
     endforeach()
+    if(BUILD_PYTHON)
+        foreach(PYTHON_TEST_MODULE ${PYTHON_TEST_MODULES})
+            add_test(
+                NAME "python_${PYTHON_TEST_MODULE}"
+                COMMAND "${CMAKE_COMMAND}" -E env "LD_PRELOAD=${LD_PRELOAD}" "ASAN_OPTIONS=exitcode=0" "PYTHONPATH=$<TARGET_FILE_DIR:pyopenrw>" "${PYTHON_EXECUTABLE}" -m unittest "${PYTHON_TEST_MODULE}"
+                WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}"
+                )
+            set_tests_properties("python_${PYTHON_TEST_MODULE}"
+                PROPERTIES
+                    TIMEOUT 300
+                )
+        endforeach()
+    endif()
 else()
     add_test(NAME UnitTests
         COMMAND "$<TARGET_FILE:rwtests>"
@@ -96,4 +119,15 @@ else()
         PROPERTIES
             TIMEOUT 300
         )
+    if(BUILD_PYTHON)
+        add_test(
+            NAME PythonTests
+            COMMAND "${CMAKE_COMMAND}" -E env "LD_PRELOAD=${LD_PRELOAD}" "ASAN_OPTIONS=exitcode=0" "PYTHONPATH=$<TARGET_FILE_DIR:pyopenrw>" "${PYTHON_EXECUTABLE}" -m unittest discover
+            WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}"
+            )
+        set_tests_properties(PythonTests
+            PROPERTIES
+                TIMEOUT 300
+            )
+    endif()
 endif()

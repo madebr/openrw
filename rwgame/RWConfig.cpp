@@ -109,6 +109,9 @@ bool vm_get_argmask(const po::variables_map& vm, const std::string_view& argmask
 
 std::optional<RWArgConfigLayer> RWArgumentParser::parseArguments(int argc, const char* argv[]) const {
     po::variables_map vm;
+    if (argc == 0) {
+        return std::nullopt;
+    }
     try {
         if (argc != 0) {
             po::command_line_parser parser(argc, argv);
@@ -157,7 +160,7 @@ std::ostream& RWArgumentParser::printHelp(std::ostream &os) const {
     return os << _desc;
 }
 
-RWConfigLayer buildDefaultConfigLayer() {
+RWConfigLayer RWConfigLayer::buildDefault() {
     RWConfigLayer layer;
 
 #define RWARG(...)

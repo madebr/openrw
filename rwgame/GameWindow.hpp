@@ -22,6 +22,14 @@ public:
 
     glm::ivec2 getSize() const;
 
+    void show() {
+        SDL_ShowWindow(window);
+    }
+
+    void hide() {
+        SDL_HideWindow(window);
+    }
+
     void swap() const {
         SDL_GL_SwapWindow(window);
     }

@@ -23,6 +23,7 @@ struct RWConfigLayer {
 #undef RWARG_OPT
 #undef RWARG
 #undef RWCONFIGARG
+    static RWConfigLayer buildDefault();
 };
 
 struct RWArgConfigLayer : public RWConfigLayer {
@@ -37,8 +38,6 @@ struct RWArgConfigLayer : public RWConfigLayer {
 #undef RWCONFIGARG
 };
 
-RWConfigLayer buildDefaultConfigLayer();
-
 template <size_t N>
 class RWConfigLayers {
     template <typename T, typename F>
@@ -52,7 +51,8 @@ class RWConfigLayers {
         return std::nullopt;
     }
 public:
-    std::array<RWConfigLayer, N> layers;
+    static constexpr size_t NLayers = N;
+    std::array<RWConfigLayer, NLayers> layers;
     template <typename Layer>
     void setLayer(size_t i, Layer&& layer) {
         layers[i] = std::forward<Layer>(layer);
@@ -83,14 +83,16 @@ public:
     }
 };
 
-class RWConfig : public RWConfigLayers<4> {
+enum RWConfigLayerDefinition {
+    LAYER_USER = 0,
+    LAYER_ARGUMENT,
+    LAYER_CONFIGFILE,
+    LAYER_DEFAULT,
+    _LAYER_COUNT,
+};
+
+class RWConfig : public RWConfigLayers<_LAYER_COUNT> {
 public:
-    enum {
-        LAYER_USER = 0,
-        LAYER_ARGUMENT = 1,
-        LAYER_CONFIGFILE = 2,
-        LAYER_DEFAULT = 3,
-    };
     std::map<std::string, std::string> unknown;
 };
 

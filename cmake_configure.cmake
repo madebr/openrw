@@ -106,7 +106,7 @@ if(NOT BOOST_STATIC)
     target_compile_definitions(rw_interface
         INTERFACE
             BOOST_ALL_DYN_LINK
-    	)
+        )
 endif()
 
 if(USE_CONAN)

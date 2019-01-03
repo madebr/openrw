@@ -3,6 +3,11 @@
 #include <rw/debug.hpp>
 #include "GitSHA1.h"
 
+#ifdef RW_PYTHON
+#include <pybind11/embed.h>
+#include "python/pyopenrw.hpp"
+#endif
+
 #include <SDL.h>
 
 #include <iostream>
@@ -15,6 +20,16 @@ GameBase::GameBase(Logger &inlog, const std::optional<RWArgConfigLayer> &args) :
         log(inlog),
         config(buildConfig(args)) {
     log.info("Game", "Build: " + kBuildStr);
+
+#ifdef RW_PYTHON
+    if (!config.nopython()) {
+        log.verbose("Game", "Python support enabled");
+        if (PYOPENRW_EMBEDDED) {
+            python_guard = std::make_unique<pybind11::scoped_interpreter>();
+        }
+        pybind11::module::import(PYOPENRW_STRING);
+    }
+#endif
 
     bool fullscreen = config.fullscreen();
     size_t w = config.width(), h = config.height();
@@ -31,10 +46,10 @@ GameBase::GameBase(Logger &inlog, const std::optional<RWArgConfigLayer> &args) :
 RWConfig GameBase::buildConfig(const std::optional<RWArgConfigLayer> &args) {
     RWConfig config;
     if (args.has_value()) {
-        config.setLayer(RWConfig::LAYER_ARGUMENT, *args);
+        config.setLayer(RWConfigLayerDefinition::LAYER_ARGUMENT, *args);
     }
-    auto defaultLayer = buildDefaultConfigLayer();
-    config.setLayer(RWConfig::LAYER_DEFAULT, defaultLayer);
+    auto defaultLayer = RWConfigLayer::buildDefault();
+    config.setLayer(RWConfigLayerDefinition::LAYER_DEFAULT, defaultLayer);
 
     rwfs::path configPath;
     if (args.has_value() && args->configPath.has_value()) {
@@ -52,7 +67,7 @@ RWConfig GameBase::buildConfig(const std::optional<RWArgConfigLayer> &args) {
             throw std::runtime_error(parseResult.what());
         }
         config.unknown = parseResult.getUnknownData();
-        config.setLayer(RWConfig::LAYER_CONFIGFILE, configLayer);
+        config.setLayer(RWConfigLayerDefinition::LAYER_CONFIGFILE, configLayer);
     }
 
     auto missingKeys = config.missingKeys();

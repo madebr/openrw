@@ -475,7 +475,7 @@ BOOST_AUTO_TEST_CASE(test_configParser_valid_default) {
     }
 
     {
-        auto defaultLayer = buildDefaultConfigLayer();
+        auto defaultLayer = RWConfigLayer::buildDefault();
         auto parseResult = cfgParser.saveFile(tempFile.path(), defaultLayer);
         BOOST_CHECK(parseResult.isValid());
     }
@@ -699,6 +699,27 @@ BOOST_AUTO_TEST_CASE(test_argParser_bool_invert_y) {
     }
 }
 
+#ifdef RW_PYTHON
+BOOST_AUTO_TEST_CASE(test_argParser_bool_nopython) {
+    RWArgumentParser argParser;
+    {
+        const char *args[] = {""};
+        auto optLayer = argParser.parseArguments(1, args);
+
+        BOOST_REQUIRE(optLayer.has_value());
+        BOOST_CHECK(!optLayer->nopython.has_value());
+    }
+    {
+        const char *args[] = {"", "--nopython"};
+        auto optLayer = argParser.parseArguments(2, args);
+
+        BOOST_REQUIRE(optLayer.has_value());
+        BOOST_REQUIRE(optLayer->nopython.has_value());
+        BOOST_CHECK(*optLayer->nopython);
+    }
+}
+#endif
+
 BOOST_AUTO_TEST_CASE(test_rwconfig_initial) {
     RWConfig config;
     auto missingKeys = config.missingKeys();
@@ -706,26 +727,26 @@ BOOST_AUTO_TEST_CASE(test_rwconfig_initial) {
 }
 
 BOOST_AUTO_TEST_CASE(test_rwconfig_defaultLayer) {
-    auto defaultLayer = buildDefaultConfigLayer();
+    auto defaultLayer = RWConfigLayer::buildDefault();
     RWConfig config;
 
-    config.setLayer(RWConfig::LAYER_DEFAULT, defaultLayer);
+    config.setLayer(RWConfigLayerDefinition::LAYER_DEFAULT, defaultLayer);
     BOOST_CHECK_NE(config.missingKeys().size(), 0u);
     BOOST_CHECK_EQUAL(config.missingKeys().size(), 1u);
 
     defaultLayer.gamedataPath = "/path/to/gamedata";
-    config.setLayer(RWConfig::LAYER_DEFAULT, defaultLayer);
+    config.setLayer(RWConfigLayerDefinition::LAYER_DEFAULT, defaultLayer);
 
-    BOOST_REQUIRE(config.layers[RWConfig::LAYER_DEFAULT].gamedataPath.has_value());
-    BOOST_CHECK_EQUAL(*config.layers[RWConfig::LAYER_DEFAULT].gamedataPath, "/path/to/gamedata");
+    BOOST_REQUIRE(config.layers[RWConfigLayerDefinition::LAYER_DEFAULT].gamedataPath.has_value());
+    BOOST_CHECK_EQUAL(*config.layers[RWConfigLayerDefinition::LAYER_DEFAULT].gamedataPath, "/path/to/gamedata");
     BOOST_CHECK_EQUAL(config.gamedataPath(), "/path/to/gamedata");
     BOOST_CHECK_EQUAL(config.missingKeys().size(), 0u);
 
-    config.layers[RWConfig::LAYER_USER].gamedataPath = "/some/other/path/to/gamedata";
-    BOOST_REQUIRE(config.layers[RWConfig::LAYER_DEFAULT].gamedataPath.has_value());
-    BOOST_CHECK_EQUAL(*config.layers[RWConfig::LAYER_DEFAULT].gamedataPath, "/path/to/gamedata");
-    BOOST_REQUIRE(config.layers[RWConfig::LAYER_USER].gamedataPath.has_value());
-    BOOST_CHECK_EQUAL(*config.layers[RWConfig::LAYER_USER].gamedataPath, "/some/other/path/to/gamedata");
+    config.layers[RWConfigLayerDefinition::LAYER_USER].gamedataPath = "/some/other/path/to/gamedata";
+    BOOST_REQUIRE(config.layers[RWConfigLayerDefinition::LAYER_DEFAULT].gamedataPath.has_value());
+    BOOST_CHECK_EQUAL(*config.layers[RWConfigLayerDefinition::LAYER_DEFAULT].gamedataPath, "/path/to/gamedata");
+    BOOST_REQUIRE(config.layers[RWConfigLayerDefinition::LAYER_USER].gamedataPath.has_value());
+    BOOST_CHECK_EQUAL(*config.layers[RWConfigLayerDefinition::LAYER_USER].gamedataPath, "/some/other/path/to/gamedata");
     BOOST_CHECK_EQUAL(config.gamedataPath(), "/some/other/path/to/gamedata");
 }
 
