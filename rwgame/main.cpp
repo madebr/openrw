@@ -9,8 +9,8 @@
 
 int main(int argc, const char* argv[]) {
     // Initialise Logging before anything else happens
-    StdOutReceiver logstdout;
-    Logger logger({ &logstdout });
+    auto logstdout = std::make_shared<StdOutReceiver>();
+    Logger logger({ logstdout });
 
     RWArgumentParser argParser;
     auto argLayerOpt = argParser.parseArguments(argc, argv);

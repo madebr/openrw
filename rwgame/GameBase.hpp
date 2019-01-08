@@ -6,7 +6,13 @@
 
 #include <core/Logger.hpp>
 
-#include <map>
+#include <memory>
+
+#ifdef RW_PYTHON
+namespace pybind11 {
+class scoped_interpreter;
+}
+#endif
 
 /**
  * @brief Handles basic window and setup
@@ -37,6 +43,9 @@ protected:
 #endif
     GameWindow window{};
     RWConfig config{};
+#ifdef RW_PYTHON
+    std::unique_ptr<pybind11::scoped_interpreter> python_guard;
+#endif
 };
 
 #endif

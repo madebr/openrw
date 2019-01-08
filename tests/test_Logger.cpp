@@ -1,7 +1,7 @@
 #include <boost/test/unit_test.hpp>
 #include <core/Logger.hpp>
 
-class CallbackReceiver : public Logger::MessageReceiver {
+class CallbackReceiver : public Logger::MessageReceiver, public std::enable_shared_from_this<CallbackReceiver> {
 public:
     std::function<void(const Logger::LogMessage&)> func;
 
@@ -21,10 +21,10 @@ BOOST_AUTO_TEST_CASE(test_receiver) {
 
     Logger::LogMessage lastMessage("", Logger::Error, "");
 
-    CallbackReceiver receiver(
+    auto receiver = std::make_shared<CallbackReceiver>(
         [&](const Logger::LogMessage& m) { lastMessage = m; });
 
-    log.addReceiver(&receiver);
+    log.addReceiver(receiver);
 
     log.info("Tests", "Test");
 

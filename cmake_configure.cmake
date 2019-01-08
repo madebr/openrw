@@ -4,6 +4,7 @@ add_library(openrw::interface ALIAS rw_interface)
 add_library(rw_checks INTERFACE)
 add_library(openrw::checks ALIAS rw_checks)
 target_link_libraries(rw_interface INTERFACE rw_checks)
+
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
     target_compile_options(rw_interface
         INTERFACE
@@ -13,6 +14,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang
             "-Wpedantic"
             "-Wmissing-braces"
             "$<IF:$<COMPILE_LANGUAGE:CXX>,-Wold-style-cast,>"
+            "-fvisibility=hidden"
         )
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     if(MSVC_NO_DEBUG_RUNTIME)
@@ -104,7 +106,7 @@ if(NOT BOOST_STATIC)
     target_compile_definitions(rw_interface
         INTERFACE
             BOOST_ALL_DYN_LINK
-    	)
+        )
 endif()
 
 if(USE_CONAN)
@@ -176,6 +178,27 @@ endif()
 foreach(SAN ${ENABLE_SANITIZERS})
     if(SAN STREQUAL "address")
         message(STATUS "Address sanitizer enabled.")
+
+        string(REPLACE "." ";" CMAKE_CXX_COMPILER_VERSION_LIST "${CMAKE_CXX_COMPILER_VERSION}")
+        list(GET CMAKE_CXX_COMPILER_VERSION_LIST 0 CMAKE_CXX_COMPILER_VERSION_MAJOR)
+        if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+            string(REPLACE "." ";" CMAKE_CXX_COMPILER_VERSION_LIST "${CMAKE_CXX_COMPILER_VERSION}")
+            list(GET CMAKE_CXX_COMPILER_VERSION_LIST 0 CMAKE_CXX_COMPILER_VERSION_MAJOR)
+            math(EXPR ASAN_VERSION "${CMAKE_CXX_COMPILER_VERSION_MAJOR}-3")
+            set(LIBASAN_NAME_CALCULATED "libasan${CMAKE_SHARED_LIBRARY_SUFFIX}.${ASAN_VERSION}")
+        elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+            math(EXPR ASAN_VERSION "${CMAKE_CXX_COMPILER_VERSION_MAJOR}-2")
+            set(LIBASAN_NAME_CALCULATED "libasan${CMAKE_SHARED_LIBRARY_SUFFIX}.${ASAN_VERSION}")
+        endif()
+        if(LIBASAN_NAME_CALCULATED)
+            find_library(ASAN_LIBRARY "${LIBASAN_NAME_CALCULATED}")
+            message(STATUS "libasan library found: ${ASAN_LIBRARY}")
+            if(NOT ASAN_LIBRARY)
+                message(FATAL_ERROR "libasan library not found: ${LIBASAN_NAME_CALCULATED}")
+            endif()
+            list(APPEND LD_PRELOAD "${ASAN_LIBRARY}")
+        endif()
+
         target_compile_options(rw_checks INTERFACE "-fsanitize=address")
         target_link_libraries(rw_checks INTERFACE "-fsanitize=address")
     elseif(SAN STREQUAL "leak")
@@ -201,6 +224,13 @@ function(openrw_target_apply_options)
 
     if(TEST_COVERAGE AND ORW_COVERAGE)
         coverage_add_target("${ORW_TARGET}" EXCEPT ${ORW_COVERAGE_EXCEPT})
+    endif()
+
+    if(WITH_PIC)
+        set_target_properties("${ORW_TARGET}"
+            PROPERTIES
+                POSITION_INDEPENDENT_CODE ON
+            )
     endif()
 
     if(ORW_CORE)

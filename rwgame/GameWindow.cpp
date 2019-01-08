@@ -51,8 +51,6 @@ void GameWindow::create(const std::string& title, size_t w, size_t h,
         windowIconWidth, windowIconHeight, 32, windowIconWidth * (32 / 8),
         rmask, gmask, bmask, amask);
     SDL_SetWindowIcon(window, icon);
-
-    SDL_ShowWindow(window);
 }
 
 void GameWindow::close() {

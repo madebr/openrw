@@ -125,6 +125,8 @@ RWGame::RWGame(Logger& log, const std::optional<RWArgConfigLayer> &args)
 
 RWGame::~RWGame() {
     log.info("Game", "Beginning cleanup");
+
+    window.close();
 }
 
 void RWGame::newGame() {
@@ -371,6 +373,8 @@ void RWGame::handleCheatInput(char symbol) {
 }
 
 int RWGame::run() {
+    window.show();
+
     namespace chrono = std::chrono;
 
     auto lastFrame = chrono::steady_clock::now();
@@ -409,9 +413,8 @@ int RWGame::run() {
         stateManager.updateStack();
     }
 
-    window.close();
-
     stateManager.clear();
+    window.hide();
 
     return 0;
 }

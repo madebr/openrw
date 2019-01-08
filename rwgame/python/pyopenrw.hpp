@@ -1,0 +1,9 @@
+#ifndef RWGAME_PYTHON_PYOPENRW_HPP
+#define RWGAME_PYTHON_PYOPENRW_HPP
+
+extern const bool PYOPENRW_EMBEDDED;
+
+#define PYOPENRW_NAME openrw
+#define PYOPENRW_STRING "openrw"
+
+#endif // RWGAME_PYTHON_PYOPENRW_HPP
