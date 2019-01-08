@@ -2,6 +2,7 @@
 #define _RWENGINE_LOGGER_HPP_
 
 #include <initializer_list>
+#include <memory>
 #include <string>
 #include <utility>
 #include <vector>
@@ -38,15 +39,16 @@ public:
      * The Logger class will not clean up allocated MessageReceivers.
      */
     struct MessageReceiver {
+        virtual ~MessageReceiver() = default;
         virtual void messageReceived(const LogMessage&) = 0;
     };
 
-    Logger(std::initializer_list<MessageReceiver*> initial = {})
+    Logger(std::initializer_list<std::shared_ptr<MessageReceiver>> initial = {})
         : receivers(initial) {
     }
 
-    void addReceiver(MessageReceiver* out);
-    void removeReceiver(MessageReceiver* out);
+    void addReceiver(std::shared_ptr<MessageReceiver> out);
+    void removeReceiver(std::shared_ptr<MessageReceiver> out);
 
     void log(const std::string& component, Logger::MessageSeverity severity,
              const std::string& message);
@@ -57,10 +59,10 @@ public:
     void error(const std::string& component, const std::string& message);
 
 private:
-    std::vector<MessageReceiver*> receivers;
+    std::vector<std::shared_ptr<MessageReceiver>> receivers;
 };
 
-class StdOutReceiver final : public Logger::MessageReceiver {
+class StdOutReceiver final : public Logger::MessageReceiver, public std::enable_shared_from_this<StdOutReceiver> {
     void messageReceived(const Logger::LogMessage&) override;
 };
 
