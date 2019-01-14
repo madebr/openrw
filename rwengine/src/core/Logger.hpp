@@ -49,8 +49,8 @@ public:
         : receivers(initial) {
     }
 
-    void addReceiver(MessageReceiver* out);
-    void removeReceiver(MessageReceiver* out);
+    void addReceiver(std::shared_ptr<MessageReceiver> out);
+    void removeReceiver(const std::shared_ptr<MessageReceiver>& out);
 
     void log(const std::string& component, Logger::MessageSeverity severity,
              const std::string& message);

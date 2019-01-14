@@ -17,9 +17,10 @@ void Logger::addReceiver(std::shared_ptr<Logger::MessageReceiver> out) {
     receivers.emplace_back(std::move(out));
 }
 
-void Logger::removeReceiver(std::shared_ptr<Logger::MessageReceiver> out) {
-    receivers.erase(std::remove(receivers.begin(), receivers.end(), out),
-                    receivers.end());
+void Logger::removeReceiver(const std::shared_ptr<Logger::MessageReceiver>& out) {
+    receivers.erase(std::remove_if(receivers.begin(), receivers.end(), [&out](auto& v) {
+        return out.get() == v.get();
+    }), receivers.end());
 }
 
 void Logger::error(const std::string& component, const std::string& message) {

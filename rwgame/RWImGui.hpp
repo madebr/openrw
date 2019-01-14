@@ -30,7 +30,7 @@ public:
 };
 
 
-class RWRingBufferLog final : public Logger::MessageReceiver {
+class RWRingBufferLog final : public Logger::MessageReceiver, std::enable_shared_from_this<RWRingBufferLog> {
 public:
 struct Message {
     enum MessageLevel {
@@ -39,7 +39,8 @@ struct Message {
         WARNING,
         ERROR,
         INPUT,
-        OUTPUT,
+        STDOUT,
+        STDERR,
         _Count,
     };
     std::string text;
@@ -52,7 +53,8 @@ public:
     bool updated = false;
     void messageReceived(const Logger::LogMessage& message) override;
     void input(const std::string txt);
-    void output(const std::string txt);
+    void toStdOut(const std::string txt);
+    void toStdErr(const std::string txt);
     const RWRingBuffer<Message, N>& getRingBuffer() const;
 };
 

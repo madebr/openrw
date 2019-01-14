@@ -8,6 +8,10 @@
 
 #include <memory>
 
+#ifdef RW_IMGUI
+class RWRingBufferLog;
+#endif
+
 #ifdef RW_PYTHON
 namespace pybind11 {
 class scoped_interpreter;
@@ -31,15 +35,17 @@ public:
         return config;
     }
 
+#ifdef RW_IMGUI
     RWRingBufferLog &getRingBufferLog() {
-        return ringbufferlog;
+        return *ringbufferlog;
     }
+#endif
 
 protected:
     RWConfig buildConfig(const std::optional<RWArgConfigLayer> &args);
     Logger& log;
 #ifdef RW_IMGUI
-    RWRingBufferLog ringbufferlog;
+    std::shared_ptr<RWRingBufferLog> ringbufferlog;
 #endif
     GameWindow window{};
     RWConfig config{};

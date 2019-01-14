@@ -33,4 +33,22 @@ BOOST_AUTO_TEST_CASE(test_receiver) {
     BOOST_CHECK_EQUAL(lastMessage.message, "Test");
 }
 
+BOOST_AUTO_TEST_CASE(test_remove_receiver) {
+    Logger log;
+
+    Logger::LogMessage lastMessage("", Logger::Error, "");
+
+    auto receiver = std::make_shared<CallbackReceiver>(
+        [&](const Logger::LogMessage& m) { lastMessage = m; });
+
+    log.addReceiver(receiver);
+    log.removeReceiver(receiver);
+
+    log.info("Tests", "Test");
+
+    BOOST_CHECK_EQUAL(lastMessage.component, "");
+    BOOST_CHECK_EQUAL(lastMessage.severity, Logger::Error);
+    BOOST_CHECK_EQUAL(lastMessage.message, "");
+}
+
 BOOST_AUTO_TEST_SUITE_END()

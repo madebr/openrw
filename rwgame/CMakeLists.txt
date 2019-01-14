@@ -45,13 +45,8 @@ add_library(librwgame STATIC
     )
 
 if(BUILD_PYTHON)
-    target_sources(librwgame
-        PRIVATE
-            python/pyembed.cpp
-        )
-
     target_link_libraries(librwgame
-        PRIVATE
+        PUBLIC
             pyopenrw_private
         )
 
@@ -114,14 +109,12 @@ target_link_libraries(rwgame
         librwgame
     )
 
-openrw_target_apply_options(
-    TARGET rwgame
-    CORE
-    COVERAGE
-    INSTALL INSTALL_PDB
-    )
-
 if(BUILD_PYTHON)
+    target_sources(rwgame
+        PRIVATE
+            python/pyembed.cpp
+        )
+
     add_library(pyopenrw_private STATIC
         python/pyopenrw_priv.hpp
         python/pyopenrw.hpp
@@ -165,3 +158,10 @@ if(BUILD_PYTHON)
         INSTALL INSTALL_PDB
         )
 endif()
+
+openrw_target_apply_options(
+    TARGET rwgame
+    CORE
+    COVERAGE
+    INSTALL INSTALL_PDB
+    )

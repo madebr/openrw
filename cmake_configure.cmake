@@ -14,7 +14,6 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang
             "-Wpedantic"
             "-Wmissing-braces"
             "$<IF:$<COMPILE_LANGUAGE:CXX>,-Wold-style-cast,>"
-            "-fvisibility=hidden"
         )
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     if(MSVC_NO_DEBUG_RUNTIME)
@@ -225,6 +224,12 @@ function(openrw_target_apply_options)
     if(TEST_COVERAGE AND ORW_COVERAGE)
         coverage_add_target("${ORW_TARGET}" EXCEPT ${ORW_COVERAGE_EXCEPT})
     endif()
+
+    set_target_properties("${ORW_TARGET}"
+        PROPERTIES
+            C_VISIBILITY_PRESET hidden
+            CXX_VISIBILITY_PRESET hidden
+        )
 
     if(WITH_PIC)
         set_target_properties("${ORW_TARGET}"

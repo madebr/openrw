@@ -19,7 +19,10 @@ const std::string kWindowTitle = "RWGame";
 GameBase::GameBase(Logger &inlog, const std::optional<RWArgConfigLayer> &args) :
         log(inlog),
         config(buildConfig(args)) {
-    log.addReceiver(&ringbufferlog);
+#ifdef RW_IMGUI
+    ringbufferlog = std::make_shared<RWRingBufferLog>();
+    log.addReceiver(ringbufferlog);
+#endif
     log.info("Game", "Build: " + kBuildStr);
 
 #ifdef RW_PYTHON
@@ -99,5 +102,7 @@ GameBase::~GameBase() {
     SDL_Quit();
 
     log.info("Game", "Done cleaning up");
-    log.removeReceiver(&ringbufferlog);
+#ifdef RW_IMGUI
+    log.removeReceiver(ringbufferlog);
+#endif
 }

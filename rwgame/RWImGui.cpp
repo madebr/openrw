@@ -11,7 +11,13 @@
 
 #include <gl/gl_core_3_3.h>
 
+#ifdef RW_PYTHON
+#include <pybind11/embed.h>
+namespace py = pybind11;
+#endif
+
 #include <array>
+#include <iostream>
 #include <sstream>
 
 void RWRingBufferLog::messageReceived(const Logger::LogMessage& message) {
@@ -26,8 +32,13 @@ void RWRingBufferLog::input(const std::string txt) {
     updated = true;
 }
 
-void RWRingBufferLog::output(const std::string txt) {
-    _log.add({std::move(txt), RWRingBufferLog::Message::MessageLevel::OUTPUT});
+void RWRingBufferLog::toStdOut(const std::string txt) {
+    _log.add({std::move(txt), RWRingBufferLog::Message::MessageLevel::STDOUT});
+    updated = true;
+}
+
+void RWRingBufferLog::toStdErr(const std::string txt) {
+    _log.add({std::move(txt), RWRingBufferLog::Message::MessageLevel::STDERR});
     updated = true;
 }
 
@@ -97,7 +108,41 @@ const std::array<ImVec4, static_cast<size_t>(RWRingBufferLog::Message::MessageLe
         ImVec4(1.0f, 0.4f, 0.4f, 1.0f),
         ImVec4(1.0f, 1.0f, 1.0f, 1.0f),
         ImVec4(0.7f, 0.7f, 0.7f, 1.0f),
+        ImVec4(1.0f, 0.4f, 0.4f, 1.0f),
     }};
+
+class PyStdErrOutStreamRedirect {
+    py::object _stdout;
+    py::object _stderr;
+    py::object _stdout_buffer;
+    py::object _stderr_buffer;
+public:
+    PyStdErrOutStreamRedirect() {
+        auto sysm = py::module::import("sys");
+        _stdout = sysm.attr("stdout");
+        _stderr = sysm.attr("stderr");
+        auto stringio = py::module::import("io").attr("StringIO");
+        _stdout_buffer = stringio();
+        _stderr_buffer = stringio();
+        sysm.attr("stdout") = _stdout_buffer;
+        sysm.attr("stderr") = _stderr_buffer;
+    }
+    std::string stdoutString() {
+        _stdout_buffer.attr("seek")(0, 0);
+        auto pyText = _stdout_buffer.attr("read")();
+        return py::str(pyText.attr("rstrip")("\n"));
+    }
+    std::string stderrString() {
+        _stderr_buffer.attr("seek")(0, 0);
+        auto pyText = _stderr_buffer.attr("read")();
+        return py::str(pyText.attr("rstrip")("\n"));
+    }
+    ~PyStdErrOutStreamRedirect() {
+        auto sysm = py::module::import("sys");
+        sysm.attr("stdout") = _stdout;
+        sysm.attr("stderr") = _stderr;
+    }
+};
 
 void log_windowdraw(RWGame& rwgame, bool* open, RWImGui::RWImGuiState &state) { // const char* title, bool* p_open = NULL) {
     ImGui::SetNextWindowSize(ImVec2(500, 400), ImGuiCond_FirstUseEver);
@@ -128,13 +173,38 @@ void log_windowdraw(RWGame& rwgame, bool* open, RWImGui::RWImGuiState &state) { 
     ImGui::EndChild();
     ImGui::Separator();
     bool reclaim_focus = false;
-    if (ImGui::InputText("command", state.log_input_buffer.data(), state.log_input_buffer.size(), ImGuiInputTextFlags_EnterReturnsTrue|ImGuiInputTextFlags_CallbackCompletion|ImGuiInputTextFlags_CallbackHistory, nullptr, nullptr))
+    if (ImGui::InputText("command", state.log_input_buffer.data(), state.log_input_buffer.size(), ImGuiInputTextFlags_EnterReturnsTrue|ImGuiInputTextFlags_CallbackCompletion|ImGuiInputTextFlags_CallbackHistory, [](auto) {return 0;}, nullptr))
     {
         auto& s = state.log_input_buffer;
         rwgame.getRingBufferLog().input(std::string("> ") + s.data());
-        rwgame.getRingBufferLog().output(s.data());
+#ifdef RW_PYTHON
+        {
+            PyStdErrOutStreamRedirect pyOutputRedirect{};
+            try {
+
+                auto res = py::eval(s.data());
+                if (!res.is_none()) {
+                    rwgame.getRingBufferLog().toStdOut(py::repr(res));
+                }
+            } catch (const std::runtime_error& e) {
+                rwgame.getRingBufferLog().messageReceived({"console", Logger::MessageSeverity::Error, "An exception occured"});
+                rwgame.getRingBufferLog().messageReceived({"console", Logger::MessageSeverity::Error, e.what()});
+            }
+            auto sout = pyOutputRedirect.stdoutString();
+            if (sout.size()) {
+                rwgame.getRingBufferLog().toStdOut(sout);
+            }
+            auto serr = pyOutputRedirect.stderrString();
+            if (serr.size()) {
+                rwgame.getRingBufferLog().toStdErr(serr);
+            }
+        }
+#else
+        rwgame.getRingBufferLog().messageReceived({"console", Logger::MessageSeverity::Error, "console commands not supported"});
+#endif
         strcpy(s.data(), "");
         reclaim_focus = true;
+        rwgame.getRingBufferLog().updated = true;
     }
     ImGui::SetItemDefaultFocus();
     if (reclaim_focus) {
