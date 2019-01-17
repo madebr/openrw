@@ -55,6 +55,10 @@ public:
     }
 };
 RWRingBuffer() = default;
+void clear() {
+    _next = 0;
+    _first = 0;
+}
 size_t size() const {
     return (_next - _first) % N;
 }

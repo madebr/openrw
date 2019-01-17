@@ -1,5 +1,7 @@
 #include "pyopenrw_priv.hpp"
 
+#include "pyopenrw.hpp"
+
 #include <GitSHA1.h>
 
 #include <pybind11/pybind11.h>
@@ -163,8 +165,10 @@ void register_streamutils(py::module& m) {
 
 void pyopenrw_register_module(py::module& m) {
     m.attr("__version__")= kGitSHA1Hash;
+    m.attr("EMBEDDED") = PYOPENRW_EMBEDDED;
     register_streamutils(m);
 
     register_logging(m);
     register_config(m);
+    register_game(m);
 }

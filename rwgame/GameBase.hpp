@@ -35,6 +35,10 @@ public:
         return config;
     }
 
+    Logger& getLogger() {
+        return log;
+    }
+
 #ifdef RW_IMGUI
     RWRingBufferLog &getRingBufferLog() {
         return *ringbufferlog;

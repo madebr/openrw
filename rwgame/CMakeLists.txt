@@ -121,6 +121,7 @@ if(BUILD_PYTHON)
         python/module.cpp
         python/logging.cpp
         python/config.cpp
+        python/game.cpp
         )
     target_link_libraries(pyopenrw_private
         PUBLIC

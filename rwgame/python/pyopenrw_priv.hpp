@@ -8,5 +8,6 @@ void pyopenrw_register_module(py::module& m);
 
 void register_logging(py::module& m);
 void register_config(py::module& m);
+void register_game(py::module& m);
 
 #endif // RWGAME_PYTHON_PYOPENRW_IMPL_HPP

@@ -56,6 +56,7 @@ public:
     void toStdOut(const std::string txt);
     void toStdErr(const std::string txt);
     const RWRingBuffer<Message, N>& getRingBuffer() const;
+    RWRingBuffer<Message, N>& getRingBuffer();
 };
 
 #endif // RWGAME_RWIMGUI_HPP

@@ -8,6 +8,7 @@
 #include <imgui.h>
 #include <imgui_impl_sdl.h>
 #include <imgui_impl_opengl3.h>
+#include <misc/cpp/imgui_stdlib.h>
 
 #include <gl/gl_core_3_3.h>
 
@@ -46,6 +47,10 @@ const RWRingBuffer<RWRingBufferLog::Message, RWRingBufferLog::N>& RWRingBufferLo
     return _log;
 }
 
+RWRingBuffer<RWRingBufferLog::Message, RWRingBufferLog::N>& RWRingBufferLog::getRingBuffer() {
+    return _log;
+}
+
 static_assert(static_cast<int>(Logger::MessageSeverity::Verbose) == static_cast<int>(RWRingBufferLog::Message::MessageLevel::VERBOSE));
 static_assert(static_cast<int>(Logger::MessageSeverity::Info)    == static_cast<int>(RWRingBufferLog::Message::MessageLevel::INFO));
 static_assert(static_cast<int>(Logger::MessageSeverity::Warning) == static_cast<int>(RWRingBufferLog::Message::MessageLevel::WARNING));
@@ -55,12 +60,19 @@ static_assert(static_cast<int>(Logger::MessageSeverity::Error)   == static_cast<
 struct RWImGui::RWImGuiState {
     bool show_demo_window = false;
     bool show_log = false;
-    std::array<char, 4096> log_input_buffer;
+    std::string log_input_buffer;
+    bool log_wrap = true;
+#ifdef RW_PYTHON
+    py::object log_console;
+#endif
 };
 
 RWImGui::RWImGui(RWGame &game)
-    : _game(game)
-    , _state(std::make_unique<RWImGui::RWImGuiState>()) {
+    : _game(game) {
+    _state = std::make_unique<RWImGui::RWImGuiState>();
+#ifdef RW_PYTHON
+    _state->log_console = py::module::import("code").attr("InteractiveConsole")(py::dict(py::arg("filename")="RWConsole"));
+#endif
 }
 
 RWImGui::~RWImGui() {
@@ -112,20 +124,28 @@ const std::array<ImVec4, static_cast<size_t>(RWRingBufferLog::Message::MessageLe
     }};
 
 class PyStdErrOutStreamRedirect {
+    py::object _stdin;
     py::object _stdout;
     py::object _stderr;
+    py::object _stdin_buffer;
     py::object _stdout_buffer;
     py::object _stderr_buffer;
 public:
     PyStdErrOutStreamRedirect() {
         auto sysm = py::module::import("sys");
+        _stdin = sysm.attr("stdin");
         _stdout = sysm.attr("stdout");
         _stderr = sysm.attr("stderr");
         auto stringio = py::module::import("io").attr("StringIO");
+        _stdin_buffer = stringio();
         _stdout_buffer = stringio();
         _stderr_buffer = stringio();
+        sysm.attr("stdin") = _stdin_buffer;
         sysm.attr("stdout") = _stdout_buffer;
         sysm.attr("stderr") = _stderr_buffer;
+    }
+    size_t stdinWrite(const std::string& s) {
+        return py::int_(_stdin_buffer.attr("write")(s));
     }
     std::string stdoutString() {
         _stdout_buffer.attr("seek")(0, 0);
@@ -144,14 +164,36 @@ public:
     }
 };
 
-void log_windowdraw(RWGame& rwgame, bool* open, RWImGui::RWImGuiState &state) { // const char* title, bool* p_open = NULL) {
+namespace {
+    static constexpr unsigned MULTILINE_NB = 5;
+}
+void log_consoledraw(RWGame& rwgame, bool* open, RWImGui::RWImGuiState &state) { // const char* title, bool* p_open = NULL) {
     ImGui::SetNextWindowSize(ImVec2(500, 400), ImGuiCond_FirstUseEver);
-    if (!ImGui::Begin("OpenRW Log", open)) {
+    ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar;
+    if (!ImGui::Begin("OpenRW Console", open, window_flags)) {
         ImGui::End();
         return;
     }
+    if (ImGui::BeginMenuBar()) {
+        if (ImGui::BeginMenu("Edit")) {
+            if (ImGui::MenuItem("Clear log")) {
+                rwgame.getRingBufferLog().getRingBuffer().clear();
+            }
+            ImGui::Separator();
+            ImGui::MenuItem("ImGui Demo Window", "", &state.show_demo_window);
+            ImGui::EndMenu();
+        }
+        if (ImGui::BeginMenu("View")) {
+            ImGui::MenuItem("Wrap lines", "", &state.log_wrap);
+            ImGui::Separator();
+            ImGui::MenuItem("ImGui Demo Window", "", &state.show_demo_window);
+            ImGui::EndMenu();
+        }
+        ImGui::EndMenuBar();
+    }
+    ImGui::Spacing();
 
-    const float footer_height_to_reserve = ImGui::GetStyle().ItemSpacing.y + ImGui::GetFrameHeightWithSpacing(); // 1 separator, 1 input text
+    const float footer_height_to_reserve = ImGui::GetStyle().ItemSpacing.y + MULTILINE_NB * ImGui::GetTextLineHeight();
     ImGui::BeginChild("ConsoleScrollingRegion", ImVec2(0, -footer_height_to_reserve), false, ImGuiWindowFlags_HorizontalScrollbar); // Leave room for 1 separator + 1 InputText
 
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0,0));
@@ -161,7 +203,11 @@ void log_windowdraw(RWGame& rwgame, bool* open, RWImGui::RWImGuiState &state) { 
         for (auto& msg : ring.slice(clipper.DisplayStart, clipper.DisplayEnd)) {
             const auto& msgColor = messageColors[static_cast<size_t>(msg.level)];
             ImGui::PushStyleColor(ImGuiCol_Text, msgColor);
-            ImGui::Text(msg.text.c_str());
+            if (state.log_wrap) {
+                ImGui::TextWrapped(msg.text.c_str());
+            } else {
+                ImGui::Text(msg.text.c_str());
+            }
             ImGui::PopStyleColor();
         }
     }
@@ -173,23 +219,49 @@ void log_windowdraw(RWGame& rwgame, bool* open, RWImGui::RWImGuiState &state) { 
     ImGui::EndChild();
     ImGui::Separator();
     bool reclaim_focus = false;
-    if (ImGui::InputText("command", state.log_input_buffer.data(), state.log_input_buffer.size(), ImGuiInputTextFlags_EnterReturnsTrue|ImGuiInputTextFlags_CallbackCompletion|ImGuiInputTextFlags_CallbackHistory, [](auto) {return 0;}, nullptr))
-    {
+
+    ImGui::Text(">>>");
+    ImGui::SameLine();
+
+    if (ImGui::InputTextMultiline("##command_multiline", &state.log_input_buffer, ImVec2(-1.f, MULTILINE_NB * ImGui::GetTextLineHeight()), ImGuiInputTextFlags_EnterReturnsTrue, [](auto) {return 0;}, nullptr)) {
         auto& s = state.log_input_buffer;
-        rwgame.getRingBufferLog().input(std::string("> ") + s.data());
+//        s.erase(s.find_last_not_of(" \t\r\n") + 1);
+
 #ifdef RW_PYTHON
         {
             PyStdErrOutStreamRedirect pyOutputRedirect{};
             try {
-
-                auto res = py::eval(s.data());
-                if (!res.is_none()) {
-                    rwgame.getRingBufferLog().toStdOut(py::repr(res));
-                }
-            } catch (const std::runtime_error& e) {
-                rwgame.getRingBufferLog().messageReceived({"console", Logger::MessageSeverity::Error, "An exception occured"});
-                rwgame.getRingBufferLog().messageReceived({"console", Logger::MessageSeverity::Error, e.what()});
+                auto push_result = state.log_console.attr("push")(s);
+            } catch (std::runtime_error& e) {
+                rwgame.getLogger().info("RWImGui", e.what());
+                rwgame.getLogger().info("RWImGui", "SystemExit event received -> exiting");
+                rwgame.getStateManager().clear();
             }
+
+            auto buffer = py::list(state.log_console.attr("buffer"));
+            state.log_console.attr("resetbuffer")();
+            std::string s_new;
+            s_new.reserve(s.size());
+            for (size_t i = 0u; i < buffer.size(); ++i) {
+                s_new.append(py::str(buffer[i]));
+                if (i != buffer.size() - 1) {
+                    s_new.append("\n");
+                }
+            }
+
+            auto s_end_pos = s.rfind(s_new);
+            auto s_executed = s.substr(0, s_end_pos);
+            s_executed.erase(s_executed.find_last_not_of(" \t\r\n") + 1);
+
+            std::cerr << "s = " << s << std::endl;
+            std::cerr << "s_new = " << s_new << std::endl;
+            std::cerr << "s_executed = " << s_executed << std::endl;
+
+            if (s_executed.size() > 0) {
+                rwgame.getRingBufferLog().input(">>> " + s_executed);
+                s = std::move(s_new);//.erase(0, s_end_pos);
+            }
+
             auto sout = pyOutputRedirect.stdoutString();
             if (sout.size()) {
                 rwgame.getRingBufferLog().toStdOut(sout);
@@ -200,9 +272,9 @@ void log_windowdraw(RWGame& rwgame, bool* open, RWImGui::RWImGuiState &state) { 
             }
         }
 #else
+        rwgame.getRingBufferLog().input(">>> " + s);
         rwgame.getRingBufferLog().messageReceived({"console", Logger::MessageSeverity::Error, "console commands not supported"});
 #endif
-        strcpy(s.data(), "");
         reclaim_focus = true;
         rwgame.getRingBufferLog().updated = true;
     }
@@ -221,14 +293,18 @@ void RWImGui::tick() {
     }
     ImGui::SetCurrentContext(_context);
 
+    ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+
     auto [window, sdl_glcontext] = _game.getWindow().getSDLContext();
 
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplSDL2_NewFrame(window);
     ImGui::NewFrame();
 
-    log_windowdraw(_game, &_state->show_log, *_state);
-    ImGui::ShowDemoWindow(&_state->show_demo_window);
+    log_consoledraw(_game, &_state->show_log, *_state);
+     if (_state->show_demo_window) {
+        ImGui::ShowDemoWindow(&_state->show_demo_window);
+    }
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
