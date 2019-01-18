@@ -21,6 +21,12 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang
             "$<IF:$<COMPILE_LANGUAGE:CXX>,-Wold-style-cast,>"
             "-fvisibility=hidden"
         )
+    if(BUILD_PYTHON)
+        target_link_libraries(rw_interface
+            INTERFACE
+                "-Wl,-Bsymbolic"
+            )
+    endif()
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     target_compile_definitions(rw_checks
         INTERFACE
