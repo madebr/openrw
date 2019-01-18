@@ -15,6 +15,12 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang
             "-Wmissing-braces"
             "$<IF:$<COMPILE_LANGUAGE:CXX>,-Wold-style-cast,>"
         )
+    if(BUILD_PYTHON)
+        target_link_libraries(rw_interface
+            INTERFACE
+                "-Wl,-Bsymbolic"
+            )
+    endif()
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     if(MSVC_NO_DEBUG_RUNTIME)
         foreach(LANG C CXX)
