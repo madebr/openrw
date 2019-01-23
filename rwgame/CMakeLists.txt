@@ -45,6 +45,12 @@ add_library(librwgame STATIC
     )
 
 if(BUILD_PYTHON)
+    target_sources(librwgame
+        PRIVATE
+            RWPython.hpp
+            RWPython.cpp
+        )
+
     target_link_libraries(librwgame
         PUBLIC
             pyopenrw_private
@@ -92,6 +98,8 @@ if(ENABLE_IMGUI)
             RWImGui.cpp
             RWImGui.hpp
             RWRingBuffer.hpp
+            RWRingBufferLog.hpp
+            RWRingBufferLog.cpp
         )
 
     target_link_libraries(librwgame

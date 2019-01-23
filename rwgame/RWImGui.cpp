@@ -3,7 +3,7 @@
 #include <core/Logger.hpp>
 
 #include "RWGame.hpp"
-#include "RWRingBuffer.hpp"
+#include "RWRingBufferLog.hpp"
 
 #include <imgui.h>
 #include <imgui_impl_sdl.h>
@@ -19,47 +19,10 @@ namespace py = pybind11;
 
 #include <array>
 #include <iostream>
-#include <sstream>
-
-void RWRingBufferLog::messageReceived(const Logger::LogMessage& message) {
-    std::ostringstream oss;
-    oss << Logger::severityChar[message.severity] << " [" << message.component << "] " << message.message;
-    _log.add({oss.str(), RWRingBufferLog::Message::MessageLevel(message.severity)});
-    updated = true;
-}
-
-void RWRingBufferLog::input(const std::string txt) {
-    _log.add({std::move(txt), RWRingBufferLog::Message::MessageLevel::INPUT});
-    updated = true;
-}
-
-void RWRingBufferLog::toStdOut(const std::string txt) {
-    _log.add({std::move(txt), RWRingBufferLog::Message::MessageLevel::STDOUT});
-    updated = true;
-}
-
-void RWRingBufferLog::toStdErr(const std::string txt) {
-    _log.add({std::move(txt), RWRingBufferLog::Message::MessageLevel::STDERR});
-    updated = true;
-}
-
-const RWRingBuffer<RWRingBufferLog::Message, RWRingBufferLog::N>& RWRingBufferLog::getRingBuffer() const {
-    return _log;
-}
-
-RWRingBuffer<RWRingBufferLog::Message, RWRingBufferLog::N>& RWRingBufferLog::getRingBuffer() {
-    return _log;
-}
-
-static_assert(static_cast<int>(Logger::MessageSeverity::Verbose) == static_cast<int>(RWRingBufferLog::Message::MessageLevel::VERBOSE));
-static_assert(static_cast<int>(Logger::MessageSeverity::Info)    == static_cast<int>(RWRingBufferLog::Message::MessageLevel::INFO));
-static_assert(static_cast<int>(Logger::MessageSeverity::Warning) == static_cast<int>(RWRingBufferLog::Message::MessageLevel::WARNING));
-static_assert(static_cast<int>(Logger::MessageSeverity::Error)   == static_cast<int>(RWRingBufferLog::Message::MessageLevel::ERROR));
-
 
 struct RWImGui::RWImGuiState {
+    bool show_console = false;
     bool show_demo_window = false;
-    bool show_log = false;
     std::string log_input_buffer;
     bool log_wrap = true;
 #ifdef RW_PYTHON
@@ -100,6 +63,14 @@ void RWImGui::destroy() {
     _context = nullptr;
 }
 
+void RWImGui::show(bool b) {
+    _state->show_console = b;
+}
+
+bool RWImGui::visible() const {
+    return _state->show_console;
+}
+
 std::tuple<bool, bool> RWImGui::process_event(SDL_Event &event) {
     if (!_context) {
         return std::make_tuple(false, false);
@@ -123,7 +94,7 @@ const std::array<ImVec4, static_cast<size_t>(RWRingBufferLog::Message::MessageLe
         ImVec4(1.0f, 0.4f, 0.4f, 1.0f),
     }};
 
-class PyStdErrOutStreamRedirect {
+class PyScopedStdStreamRedirect {
     py::object _stdin;
     py::object _stdout;
     py::object _stderr;
@@ -131,7 +102,7 @@ class PyStdErrOutStreamRedirect {
     py::object _stdout_buffer;
     py::object _stderr_buffer;
 public:
-    PyStdErrOutStreamRedirect() {
+    PyScopedStdStreamRedirect() {
         auto sysm = py::module::import("sys");
         _stdin = sysm.attr("stdin");
         _stdout = sysm.attr("stdout");
@@ -157,7 +128,7 @@ public:
         auto pyText = _stderr_buffer.attr("read")();
         return py::str(pyText.attr("rstrip")("\n"));
     }
-    ~PyStdErrOutStreamRedirect() {
+    ~PyScopedStdStreamRedirect() {
         auto sysm = py::module::import("sys");
         sysm.attr("stdout") = _stdout;
         sysm.attr("stderr") = _stderr;
@@ -180,7 +151,6 @@ void log_consoledraw(RWGame& rwgame, bool* open, RWImGui::RWImGuiState &state) {
                 rwgame.getRingBufferLog().getRingBuffer().clear();
             }
             ImGui::Separator();
-            ImGui::MenuItem("ImGui Demo Window", "", &state.show_demo_window);
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("View")) {
@@ -229,7 +199,7 @@ void log_consoledraw(RWGame& rwgame, bool* open, RWImGui::RWImGuiState &state) {
 
 #ifdef RW_PYTHON
         {
-            PyStdErrOutStreamRedirect pyOutputRedirect{};
+            PyScopedStdStreamRedirect pyOutputRedirect{};
             try {
                 auto push_result = state.log_console.attr("push")(s);
             } catch (std::runtime_error& e) {
@@ -301,8 +271,10 @@ void RWImGui::tick() {
     ImGui_ImplSDL2_NewFrame(window);
     ImGui::NewFrame();
 
-    log_consoledraw(_game, &_state->show_log, *_state);
-     if (_state->show_demo_window) {
+    if (_state->show_console) {
+        log_consoledraw(_game, &_state->show_console, *_state);
+    }
+    if (_state->show_demo_window) {
         ImGui::ShowDemoWindow(&_state->show_demo_window);
     }
 

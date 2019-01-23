@@ -2,7 +2,7 @@
 #define RWGAME_GAMEBASE_HPP
 #include "GameWindow.hpp"
 #include "RWConfig.hpp"
-#include "RWImGui.hpp"
+#include "RWPython.hpp"
 
 #include <core/Logger.hpp>
 
@@ -10,12 +10,6 @@
 
 #ifdef RW_IMGUI
 class RWRingBufferLog;
-#endif
-
-#ifdef RW_PYTHON
-namespace pybind11 {
-class scoped_interpreter;
-}
 #endif
 
 /**
@@ -54,7 +48,7 @@ protected:
     GameWindow window{};
     RWConfig config{};
 #ifdef RW_PYTHON
-    std::unique_ptr<pybind11::scoped_interpreter> python_guard;
+    RWScopedPythonInterpreter scopedPythonIterpreter;
 #endif
 };
 

@@ -1,11 +1,16 @@
 #include "pyopenrw.hpp"
 #include "pyopenrw_priv.hpp"
 
+#include "RWPython.hpp"
+
 #include <core/Logger.hpp>
 
 #include <SDL.h>
 
 const bool PYOPENRW_EMBEDDED = false;
+
+void RWScopedPythonInterpreter::create() {
+}
 
 PYBIND11_MODULE(PYOPENRW_NAME, m) {
     SDL_SetMainReady();

@@ -1,12 +1,17 @@
 #include "GameBase.hpp"
 
-#include <rw/debug.hpp>
 #include "GitSHA1.h"
+
+#ifdef RW_IMGUI
+#include "RWRingBufferLog.hpp"
+#endif
 
 #ifdef RW_PYTHON
 #include <pybind11/embed.h>
 #include "python/pyopenrw.hpp"
 #endif
+
+#include <rw/debug.hpp>
 
 #include <SDL.h>
 
@@ -28,10 +33,7 @@ GameBase::GameBase(Logger &inlog, const std::optional<RWArgConfigLayer> &args) :
 #ifdef RW_PYTHON
     if (!config.nopython()) {
         log.verbose("Game", "Python support enabled");
-        if (PYOPENRW_EMBEDDED) {
-            python_guard = std::make_unique<pybind11::scoped_interpreter>();
-        }
-        pybind11::module::import(PYOPENRW_STRING);
+        scopedPythonIterpreter.create();
     }
 #endif
 

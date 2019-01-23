@@ -36,8 +36,6 @@ static constexpr std::array<
 constexpr float kMaxPhysicsSubSteps = 2;
 }  // namespace
 
-#define MOUSE_SENSITIVITY_SCALE 2.5f
-
 RWGame::RWGame(Logger& log, const std::optional<RWArgConfigLayer> &args)
     : GameBase(log, args)
     , data(&log, config.gamedataPath())
@@ -492,8 +490,8 @@ bool RWGame::updateInput() {
                 break;
 
             case SDL_MOUSEMOTION:
-                event.motion.xrel *= MOUSE_SENSITIVITY_SCALE;
-                event.motion.yrel *= MOUSE_SENSITIVITY_SCALE;
+                event.motion.xrel *= config.mouseSensitivity();
+                event.motion.yrel *= config.mouseSensitivity();
                 break;
         }
 
@@ -946,6 +944,11 @@ void RWGame::globalKeyEvent(const SDL_Event& event) {
         case SDLK_0:
             world->state->basic.timeScale *= 2.0f;
             break;
+#ifdef RW_IMGUI
+        case SDLK_BACKQUOTE:
+            imgui.show(!imgui.visible());
+            break;
+#endif
         case SDLK_F1:
             toggle_debug(DebugViewMode::General);
             break;
