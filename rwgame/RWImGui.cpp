@@ -100,6 +100,7 @@ const std::array<ImVec4, static_cast<size_t>(RWRingBufferLog::Message::MessageLe
 namespace {
     static constexpr unsigned MULTILINE_NB = 5;
 }
+
 void log_consoledraw(RWGame& rwgame, bool* open, RWImGui::RWImGuiState &state) { // const char* title, bool* p_open = NULL) {
     ImGui::SetNextWindowSize(ImVec2(500, 400), ImGuiCond_FirstUseEver);
     ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar;
@@ -210,6 +211,9 @@ void RWImGui::tick() {
     }
     if (_state->show_demo_window) {
         ImGui::ShowDemoWindow(&_state->show_demo_window);
+    }
+    if (!_state->show_console && !_state->show_demo_window) {
+        ImGui::GetIO().MouseDrawCursor = false;
     }
 
     ImGui::Render();
