@@ -5,6 +5,8 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/embed.h>
 
+#include <iostream>
+
 namespace py = pybind11;
 
 class PyScopedStdStreamRedirect {
@@ -61,6 +63,8 @@ RWSubPythonInterpreter::RWSubPythonInterpreter()
     : m_sub_interpreter(std::make_unique<SubInterpreter>()) {
 }
 
+RWSubPythonInterpreter::~RWSubPythonInterpreter() = default;
+
 RWSubPythonInterpreter::ExecutionResult RWSubPythonInterpreter::run(const std::string& s) {
     ExecutionResult result;
     PyScopedStdStreamRedirect scopedStdRedirect;
@@ -72,6 +76,8 @@ RWSubPythonInterpreter::ExecutionResult RWSubPythonInterpreter::run(const std::s
 
     auto buffer = py::list(m_sub_interpreter->console.attr("buffer"));
     m_sub_interpreter->console.attr("resetbuffer")();
+    std::cerr << "buffer: " << static_cast<std::string>(py::repr(buffer)) << "\n";
+
     std::string s_new;
     s_new.reserve(s.size());
     for (size_t i = 0u; i < buffer.size(); ++i) {

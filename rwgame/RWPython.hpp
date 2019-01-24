@@ -1,3 +1,6 @@
+#ifndef RWGAME_RWPYTHON_HPP
+#define RWGAME_RWPYTHON_HPP
+
 #include <memory>
 
 class RWScopedPythonInterpreter {
@@ -14,6 +17,7 @@ class RWSubPythonInterpreter {
 public:
     RWSubPythonInterpreter();
     RWSubPythonInterpreter(RWSubPythonInterpreter &) = delete;
+    ~RWSubPythonInterpreter();
 
     struct ExecutionResult {
         std::string py_executed;
@@ -24,3 +28,5 @@ public:
     };
     ExecutionResult run(const std::string& s);
 };
+
+#endif // RWGAME_RWPYTHON_HPP
