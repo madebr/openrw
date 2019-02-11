@@ -2,6 +2,7 @@
 
 #include <cstring>
 #include <sstream>
+#include <iostream>
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -18,6 +19,13 @@ constexpr GLuint kUBOIndexDraw = 2;
 GLuint compileShader(GLenum type, const char* source) {
     GLuint shader = glCreateShader(type);
 
+    while (true) {
+        GLenum err = glGetError();
+        if (err == GL_NO_ERROR) {
+            break;
+        }
+        std::cerr << __FUNCTION__ << ":" << __LINE__ << ": ERROR glGetError() -> " << std::hex << "0x" << static_cast<unsigned>(err) << '\n';
+    }
     if (shader == 0) {
         RW_ERROR("[OGL] Failed to create shader object");
         throw std::runtime_error("Compiling shader failed");
@@ -29,8 +37,15 @@ GLuint compileShader(GLenum type, const char* source) {
     GLint status;
     glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
 
+    while (true) {
+        GLenum err = glGetError();
+        if (err == GL_NO_ERROR) {
+            break;
+        }
+        std::cerr << __FUNCTION__ << ":" << __LINE__ << ": ERROR glGetError() -> " << std::hex << "0x" << static_cast<unsigned>(err) << '\n';
+    }
     if (status != GL_TRUE) {
-        RW_ERROR("[OGL] Shader Compilation Failed");
+        RW_ERROR("[OGL] Shader Compilation Failed.\nFailing shader type=0x" << std::hex << static_cast<unsigned>(type) << "\nsrc=" << source);
     }
 
     GLint len;
@@ -205,9 +220,36 @@ void OpenGLRenderer::useProgram(Renderer::ShaderProgram* p) {
     }
 }
 
+namespace {
+static bool supportsShaders() {
+    GLboolean b;
+    glGetBooleanv(GL_SHADER_COMPILER, &b);
+    return b != GL_FALSE;
+}
+//GLenum source,GLenum type,GLuint id,GLenum severity,GLsizei length,const GLchar *message,const void *userParam
+void RWGL_MessageCallback(
+        GLenum /*source*/,
+        GLenum type,
+        GLuint /*id*/,
+        GLenum severity,
+        GLsizei /*length*/,
+        const GLchar* message,
+        const void* /*userParam*/)
+{
+    std::cerr << "GL CALLBACK:" << ( type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : "" )
+              << " severity=" << std::hex << "0x" << static_cast<unsigned>(severity) << ", message=" << message << "\n";//std::hex << "0x" << static_cast<unsigned>(source) << '\n';
+}
+}
+
 OpenGLRenderer::OpenGLRenderer() {
     // We need to query for some profiling exts.
     ogl_CheckExtensions();
+
+    if (!supportsShaders()) {
+        std::cerr << "ERROR: OpenGL implementation does not support shader compilation (throw?)\n";
+    }
+    glEnable(GL_DEBUG_OUTPUT);
+    glDebugMessageCallback(RWGL_MessageCallback, this);
 
     glGenQueries(1, &debugQuery);
 
