@@ -51,8 +51,17 @@ else()
     rwdep_wrap_find_packages()
 endif()
 
-set(OpenGL_GL_PREFERENCE GLVND)
+set(OpenGL_GL_PREFERENCE "LEGACY")
 find_package(OpenGL REQUIRED)
+
+message("OPENGL_INCLUDE_DIR: ${OPENGL_INCLUDE_DIR}")
+message("OPENGL_EGL_INCLUDE_DIRS: ${OPENGL_EGL_INCLUDE_DIRS}")
+message("OPENGL_LIBRARIES: ${OPENGL_LIBRARIES}")
+message("OPENGL_egl_LIBRARY: ${OPENGL_egl_LIBRARY}")
+message("OPENGL_glu_LIBRARY: ${OPENGL_glu_LIBRARY}")
+message("OPENGL_glx_LIBRARY: ${OPENGL_glx_LIBRARY}")
+message("OPENGL_opengl_LIBRARY: ${OPENGL_opengl_LIBRARY}")
+message("OPENGL_gl_LIBRARY: ${OPENGL_gl_LIBRARY}")
 
 if(CHECK_CLANGTIDY)
     find_package(ClangTidy REQUIRED)
