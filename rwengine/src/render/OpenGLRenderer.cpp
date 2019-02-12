@@ -224,7 +224,7 @@ namespace {
 static bool supportsShaders() {
     GLboolean b;
     glGetBooleanv(GL_SHADER_COMPILER, &b);
-    return b != GL_FALSE;
+    return b == GL_TRUE;
 }
 //GLenum source,GLenum type,GLuint id,GLenum severity,GLsizei length,const GLchar *message,const void *userParam
 void RWGL_MessageCallback(
