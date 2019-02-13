@@ -51,7 +51,7 @@ else()
     rwdep_wrap_find_packages()
 endif()
 
-set(OpenGL_GL_PREFERENCE "LEGACY")
+set(OpenGL_GL_PREFERENCE "GLVND")
 find_package(OpenGL REQUIRED)
 
 message("OPENGL_INCLUDE_DIR: ${OPENGL_INCLUDE_DIR}")

@@ -226,19 +226,6 @@ static bool supportsShaders() {
     glGetBooleanv(GL_SHADER_COMPILER, &b);
     return b == GL_TRUE;
 }
-//GLenum source,GLenum type,GLuint id,GLenum severity,GLsizei length,const GLchar *message,const void *userParam
-void RWGL_MessageCallback(
-        GLenum /*source*/,
-        GLenum type,
-        GLuint /*id*/,
-        GLenum severity,
-        GLsizei /*length*/,
-        const GLchar* message,
-        const void* /*userParam*/)
-{
-    std::cerr << "GL CALLBACK:" << ( type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : "" )
-              << " severity=" << std::hex << "0x" << static_cast<unsigned>(severity) << ", message=" << message << "\n";//std::hex << "0x" << static_cast<unsigned>(source) << '\n';
-}
 }
 
 OpenGLRenderer::OpenGLRenderer() {
@@ -248,8 +235,6 @@ OpenGLRenderer::OpenGLRenderer() {
     if (!supportsShaders()) {
         std::cerr << "ERROR: OpenGL implementation does not support shader compilation (throw?)\n";
     }
-    glEnable(GL_DEBUG_OUTPUT);
-    glDebugMessageCallback(RWGL_MessageCallback, this);
 
     glGenQueries(1, &debugQuery);
 
