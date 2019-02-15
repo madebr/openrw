@@ -31,6 +31,9 @@ void GameWindow::create(const std::string& title, size_t w, size_t h,
         std::string sdlErrorStr = SDL_GetError();
         throw std::runtime_error("SDL_GL_CreateContext failed: " + sdlErrorStr);
     }
+    if (SDL_GL_MakeCurrent(window, glcontext) != 0) {
+        throw std::runtime_error(std::string("SDL_GL_MakeCurrent() failed: ") + SDL_GetError() + '\n');
+    }
 
     // This part sets an embedded icon to the window
     // The source "image" is a 32-bit RGBA buffer exported from GIMP
