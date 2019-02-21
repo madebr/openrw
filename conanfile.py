@@ -34,7 +34,6 @@ class OpenrwConan(ConanFile):
             'glm/0.9.9.1@g-truc/stable',
             'ffmpeg/4.0.2@bincrafters/stable',
             'sdl2/2.0.9@bincrafters/stable',
-            'glew/2.1.0@bincrafters/stable',
             'boost/1.68.0@conan/stable',
         ),
         'viewer': (

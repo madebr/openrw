@@ -59,7 +59,7 @@ target_link_libraries(rwcore
         Boost::boost
         glm::glm
         openrw::interface
-        GLEW::GLEW
+        rw_glew
     PRIVATE
         OpenGL::GL
     )
