@@ -30,6 +30,8 @@
 ** THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <stdio.h>
+
 #ifndef GLEW_INCLUDE
 #include <GL/glew.h>
 #else
@@ -17838,18 +17840,22 @@ static GLenum GLEWAPIENTRY glewContextInit ()
   getString = glGetString;
   #else
   getString = (PFNGLGETSTRINGPROC) glewGetProcAddress((const GLubyte*)"glGetString");
+  printf("%s GLEW_DEBUG: glewGetProcAddress(\"glGetString\") returned 0x%x\n", __PRETTY_FUNCTION__, getString);
   if (!getString)
     return GLEW_ERROR_NO_GL_VERSION;
   #endif
 
   /* query opengl version */
   s = getString(GL_VERSION);
+  printf("GLEW_DEBUG: getString(GL_VERSION) returned 0x%x\n", s);
   dot = _glewStrCLen(s, '.');
+  printf("%s GLEW_DEBUG: dot == _glewStrCLen(getString(GL_VERSION), '.') == 0x%x\n", __PRETTY_FUNCTION__, dot);
   if (dot == 0)
     return GLEW_ERROR_NO_GL_VERSION;
 
   major = s[dot-1]-'0';
   minor = s[dot+1]-'0';
+  printf("%s GLEW_DEBUG: major = 0x%x     minor = 0x%x\n", __PRETTY_FUNCTION__, major, minor);
 
   if (minor < 0 || minor > 9)
     minor = 0;
@@ -22548,9 +22554,12 @@ GLenum glxewInit ()
   const GLubyte* extStart;
   const GLubyte* extEnd;
   /* initialize core GLX 1.2 */
-  if (_glewInit_GLX_VERSION_1_2()) return GLEW_ERROR_GLX_VERSION_11_ONLY;
+  GLboolean r = _glewInit_GLX_VERSION_1_2();
+  printf("%s GLEW_DEBUG: _glewInit_GLX_VERSION_1_2() = 0x%x\n", __PRETTY_FUNCTION__, r);
+  if (r) return GLEW_ERROR_GLX_VERSION_11_ONLY;
   /* check for a display */
   display = glXGetCurrentDisplay();
+  printf("%s GLEW_DEBUG: glXGetCurrentDisplay() = 0x%x\n", __PRETTY_FUNCTION__, display);
   if (display == NULL) return GLEW_ERROR_NO_GLX_DISPLAY;
   /* initialize flags */
   GLXEW_VERSION_1_0 = GL_TRUE;
@@ -22875,6 +22884,7 @@ GLenum GLEWAPIENTRY glewInit (void)
   PFNEGLGETCURRENTDISPLAYPROC getCurrentDisplay = NULL;
 #endif
   r = glewContextInit();
+  printf("%s GLEW_DEBUG glewContextInit() returned 0x%x\n", __PRETTY_FUNCTION__, r);
   if ( r != 0 ) return r;
 #if defined(GLEW_EGL)
   getCurrentDisplay = (PFNEGLGETCURRENTDISPLAYPROC) glewGetProcAddress("eglGetCurrentDisplay");
@@ -22884,7 +22894,9 @@ GLenum GLEWAPIENTRY glewInit (void)
 #elif defined(_WIN32)
   return wglewInit();
 #elif !defined(__APPLE__) || defined(GLEW_APPLE_GLX) /* _UNIX */
-  return glxewInit();
+  r = glxewInit();
+  printf("%s GLEW_DEBUG glxewInit() returned 0x%x\n", __PRETTY_FUNCTION__, r);
+  return r;
 #else
   return r;
 #endif /* _WIN32 */
