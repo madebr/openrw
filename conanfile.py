@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from conans import ConanFile, CMake
 
 
@@ -30,17 +32,17 @@ class OpenrwConan(ConanFile):
     _rw_dependencies = {
         'game': (
             'openal/1.19.0@bincrafters/stable',
-            'bullet3/2.87@bincrafters/stable',
-            'glm/0.9.9.1@g-truc/stable',
-            'ffmpeg/4.0.2@bincrafters/stable',
+            'bullet3/2.88@bincrafters/stable',
+            'glm/0.9.9.4@g-truc/stable',
+            'ffmpeg/4.1@bincrafters/stable',
             'sdl2/2.0.9@bincrafters/stable',
-            'boost/1.68.0@conan/stable',
+            'boost/1.70.0@conan/stable',
         ),
         'viewer': (
-            'qt/5.12.0@bincrafters/stable',
+            'qt/5.13.0@bincrafters/stable',
         ),
         'tools': (
-            'freetype/2.9.0@bincrafters/stable',
+            'freetype/2.10.0@bincrafters/stable',
         ),
     }
 
@@ -58,7 +60,7 @@ class OpenrwConan(ConanFile):
             for dep in self._rw_dependencies['tools']:
                 self.requires(dep)
 
-    def _configure_cmake(self):
+    def build(self):
         cmake = CMake(self)
         defs = {
             'BUILD_SHARED_LIBS': False,
@@ -72,17 +74,13 @@ class OpenrwConan(ConanFile):
         }
 
         cmake.configure(defs=defs)
-        return cmake
-
-    def build(self):
-        cmake = self._configure_cmake()
         cmake.build()
 
     def package(self):
         if self.options.viewer:
             # FIXME: https://github.com/osechet/conan-qt/issues/6 and https://github.com/conan-io/conan/issues/2619
             self.copy('qt.conf', dst='bin', src='rwviewer')
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
         cmake.install()
 
     def package_info(self):
